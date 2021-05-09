@@ -395,6 +395,7 @@ def process_test_set(path, n_jobs):
 
     images = listdir(images_folder_path)
     for image_id in images:
+        image_id = splitext(image_id)[0]
         grey_resize(image_id, images_folder_path, masks_folder_path)
 
 
@@ -402,5 +403,5 @@ def process_test_set(path, n_jobs):
 if __name__ == "__main__":
     path = "D:/Users/imbrm/ISIC_2017_new"
 
-    generate_dataset(path, 5)
+    #generate_dataset(path, 5)
     process_test_set(path, 5)

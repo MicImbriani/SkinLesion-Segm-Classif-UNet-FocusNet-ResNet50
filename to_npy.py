@@ -37,7 +37,7 @@ def turn_npy_masks(folder_path):
     print(npa.shape)
     return npa, npa1
 
-def train_val_split(path):
+def turn_npy(path):
     images_folder_path = path + "/" + "Train"
     masks_folder_path = images_folder_path + "_GT_masks"
     val_imgs_folder_path = path + "/" + "Validation"
@@ -81,13 +81,14 @@ def train_val_split(path):
     testMask /= 255.  # scale masks to [0, 1]
 
 
-    np.save('/var/tmp/mi714/test_new_npy2/data.npy',train_X)
-    np.save('/var/tmp/mi714/test_new_npy2/dataMask.npy',train_y)
-    np.save('/var/tmp/mi714/test_new_npy2/dataval.npy', val_X)
-    np.save('/var/tmp/mi714/test_new_npy2/dataMaskval.npy', val_y)
-    np.save('/var/tmp/mi714/test_new_npy2/datatest.npy', test_X)
-    np.save('/var/tmp/mi714/test_new_npy2/dataMasktest.npy', test_y)
+    np.save(save_path + '/data.npy',train_X)
+    np.save(save_path + '/dataMask.npy',train_y)
+    np.save(save_path + '/dataval.npy', val_X)
+    np.save(save_path + '/dataMaskval.npy', val_y)
+    np.save(save_path + '/datatest.npy', test_X)
+    np.save(save_path + '/dataMasktest.npy', test_y)
 
     
 path = "/var/tmp/mi714/aug17"
-train_val_split(path)
+save_path = "/var/tmp/mi714/test_new_npy2"
+turn_npy(path)
