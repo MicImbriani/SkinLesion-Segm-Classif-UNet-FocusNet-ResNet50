@@ -1,5 +1,125 @@
+import keras
+
+class BatchNormalization(keras.layers.BatchNormalization):
+    """
+    Identical to keras.layers.BatchNormalization, but adds the option to freeze parameters.
+    """
+    def __init__(self, freeze, *args, **kwargs):
+        self.freeze = freeze
+        super(BatchNormalization, self).__init__(*args, **kwargs)
+
+        # set to non-trainable if freeze is true
+        self.trainable = not self.freeze
+
+    def call(self, *args, **kwargs):
+        # return super.call, but set training
+        return super(BatchNormalization, self).call(training=(not self.freeze), *args, **kwargs)
+
+    def get_config(self):
+        config = super(BatchNormalization, self).get_config()
+        config.update({'freeze': self.freeze})
+        return config
+
+####################################################################
+import sys, os
+import numpy as np
+from keras.preprocessing.image import (Iterator, ImageDataGenerator,
+                                       random_channel_shift)
+from scipy.ndimage.interpolation import map_coordinates
+from scipy.ndimage.filters import gaussian_filter
+
+def transform_matrix_offset_center(matrix, x, y):
+    o_x = float(x) / 2 + 0.5
+    o_y = float(y) / 2 + 0.5
+    offset_matrix = np.array([[1, 0, o_x], [0, 1, o_y], [0, 0, 1]])
+    reset_matrix = np.array([[1, 0, -o_x], [0, 1, -o_y], [0, 0, 1]])
+    transform_matrix = np.dot(np.dot(offset_matrix, matrix), reset_matrix)
+    return transform_matrix
+
+def flip_axis(x, axis):
+  x = np.asarray(x).swapaxes(axis, 0)
+  x = x[::-1, ...]
+  x = x.swapaxes(0, axis)
+  return x
+
+def apply_transform(x,
+                    transform_matrix,
+                    channel_axis=0,
+                    fill_mode='nearest',
+                    cval=0.):
+  x = np.rollaxis(x, channel_axis, 0)
+  final_affine_matrix = transform_matrix[:2, :2]
+  final_offset = transform_matrix[:2, 2]
+  channel_images = [
+      ndi.interpolation.affine_transform(
+          x_channel,
+          final_affine_matrix,
+          final_offset,
+          order=1,
+          mode=fill_mode,
+          cval=cval) for x_channel in x
+  ]
+  x = np.stack(channel_images, axis=0)
+  x = np.rollaxis(x, 0, channel_axis + 1)
+  return x
+
+_dir = os.path.join(os.path.realpath(os.path.dirname(__file__)), '')
+data_path = os.path.join(_dir, '../')
+aug_data_path = os.path.join(_dir, 'aug_data')
+aug_pattern = os.path.join(aug_data_path, 'train_img_%d.npy')
+aug_mask_pattern = os.path.join(aug_data_path, 'train_mask_%d.npy')
+
+
+def random_zoom(x, y, zoom_range, row_index=1, col_index=2, channel_index=0,
+                fill_mode='nearest', cval=0.):
+    if len(zoom_range) != 2:
+        raise Exception('zoom_range should be a tuple or list of two floats. '
+                        'Received arg: ', zoom_range)
+
+    if zoom_range[0] == 1 and zoom_range[1] == 1:
+        zx, zy = 1, 1
+    else:
+        zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
+    zoom_matrix = np.array([[zx, 0, 0],
+                            [0, zy, 0],
+                            [0, 0, 1]])
+
+    h, w = x.shape[row_index], x.shape[col_index]
+    transform_matrix = transform_matrix_offset_center(zoom_matrix, h, w)
+    x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
+    y = apply_transform(y, transform_matrix, channel_index, fill_mode, cval)
+    return x, y
+
+
+def random_rotation(x, y, rg, row_index=1, col_index=2, channel_index=0,
+                    fill_mode='nearest', cval=0.):
+    theta = np.pi / 180 * np.random.uniform(-rg, rg)
+    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
+                                [np.sin(theta), np.cos(theta), 0],
+                                [0, 0, 1]])
+
+    h, w = x.shape[row_index], x.shape[col_index]
+    transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w)
+    x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
+    y = apply_transform(y, transform_matrix, channel_index, fill_mode, cval)
+    return x, y
+
+
+def random_shear(x, y, intensity, row_index=1, col_index=2, channel_index=0,
+                 fill_mode='constant', cval=0.):
+    shear = np.random.uniform(-intensity, intensity)
+    shear_matrix = np.array([[1, -np.sin(shear), 0],
+                             [0, np.cos(shear), 0],
+                             [0, 0, 1]])
+
+    h, w = x.shape[row_index], x.shape[col_index]
+    transform_matrix = transform_matrix_offset_center(shear_matrix, h, w)
+    x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
+    y = apply_transform(y, transform_matrix, channel_index, fill_mode, cval)
+    return x, y
+#####################################################################
+
 from keras.layers import Conv1D, Conv2D, Activation, Multiply, Add, Concatenate
-from Batch_Normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 from keras.regularizers import l2
 from se import squeeze_excite_block
@@ -149,14 +269,12 @@ from keras.layers import Input, UpSampling2D
 from keras.optimizers import *
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 import keras.backend as K
-from keras.preprocessing.image import flip_axis, random_channel_shift
-from augmentation import random_rotation, random_zoom
 
-trainData = np.load('data.npy')
-trainMask = np.load('dataMask.npy')
+trainData = np.load('/var/tmp/mi714/test_new_npy2/data.npy')
+trainMask = np.load('/var/tmp/mi714/test_new_npy2/dataMask.npy')
 
-valData = np.load('dataval.npy')
-valMask = np.load('dataMaskval.npy')
+valData = np.load('/var/tmp/mi714/test_new_npy2/dataval.npy')
+valMask = np.load('/var/tmp/mi714/test_new_npy2/dataMaskval.npy')
 
 trainData = trainData.astype('float32')
 mean = np.mean(trainData)  # mean for data centering
@@ -222,26 +340,71 @@ x_train, y_train = Augmentation(trainData,trainMask)
 
 ########################################################################################################################################################################
 
-smooth=1
+import keras.backend as K
+from keras import losses
+import tensorflow as tf
+
+
+
+def true_positive(y_true, y_pred):
+    smooth = 1
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    y_pos = K.round(K.clip(y_true, 0, 1))
+    tp = (K.sum(y_pos * y_pred_pos) + smooth)/ (K.sum(y_pos) + smooth) 
+    return tp 
+
+def true_negative(y_true, y_pred):
+    smooth = 1
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    y_pred_neg = 1 - y_pred_pos
+    y_pos = K.round(K.clip(y_true, 0, 1))
+    y_neg = 1 - y_pos 
+    tn = (K.sum(y_neg * y_pred_neg) + smooth) / (K.sum(y_neg) + smooth )
+    return tn 
+
+def false_positive(y_true, y_pred):
+    tp = true_positive(y_true, y_pred)
+    return 1 - tp
+
+def false_negative(y_true, y_pred):
+    tn = true_negative(y_true, y_pred)
+    return 1 - tn
+
+def sensitivity(y_true, y_pred):
+    tp = true_positive(y_true, y_pred)
+    fn = false_negative(y_true, y_pred)
+    return tp / (tp + fn)
+
+def specificity(y_true, y_pred):
+    tn = true_negative(y_true, y_pred)
+    fp = false_positive(y_true, y_pred)
+    return tn / (tn + fp)
+
+
 def dice_coef(y_true, y_pred, smooth=1):
-    intersection = K.sum(y_true * y_pred, axis=[1,2,3])
-    union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
-    return K.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
+    intersection = K.sum(K.flatten(y_true) * K.flatten(y_pred))
+    union = K.sum(y_true) + K.sum(y_pred)
+    return K.mean( (2. * intersection + smooth) / (union + smooth))
 
 def dice_coef_loss(y_true, y_pred):
-    return 1-dice_coef(y_true, y_pred)
+    dice = dice_coef(y_true, y_pred)
+    return (1 - dice)
 
-def jaccard_coef(y_true, y_pred, smooth=100):
+def jaccard_coef(y_true, y_pred, smooth=1):
     intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
-    sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
-    jac = (intersection + smooth) / (sum_ - intersection + smooth)
-    return (1 - jac) * smooth
+    summation = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
+    jac = (intersection + smooth) / (summation - intersection + smooth)
+    return K.mean(jac)
+
+def jaccard_coef_loss(y_true, y_pred, smooth=1):
+    jac = jaccard_coef(y_true, y_pred)
+    return (1 - jac)
 
 ########################################################################################################################################################################
 
 def get_focusnetAlpha():
     
-    inputs = Input((256, 256, 3))
+    inputs = Input((256, 256, 1))
            
     conv1 = initial_conv_block()(inputs)
     conv1 = focusnetAlphaLayer(84)(conv1)
