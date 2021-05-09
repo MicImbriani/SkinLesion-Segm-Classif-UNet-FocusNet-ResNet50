@@ -309,7 +309,7 @@ def generate_dataset(path, n_jobs):
 
     # Delete metadata file.
     try:
-        os.remove(images_folder_path + "/" + "ISIC-2017_Training_Data_metadata.csv")
+        os.remove(images_folder_path + "/ISIC-2017_Training_Data_metadata.csv")
     except: 
         pass
 

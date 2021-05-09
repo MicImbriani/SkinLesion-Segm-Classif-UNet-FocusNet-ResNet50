@@ -1,7 +1,9 @@
 from os import listdir
 from os.path import splitext
-import cv2
 from PIL import Image
+
+import cv2
+import numpy as np
 
 def turn_npy_imgs(folder_path):    
     images = [splitext(file)[0] for file in listdir(folder_path)]
@@ -37,13 +39,13 @@ def turn_npy_masks(folder_path):
     print(npa.shape)
     return npa, npa1
 
-def turn_npy(path):
-    images_folder_path = path + "/" + "Train"
-    masks_folder_path = images_folder_path + "_GT_masks"
-    val_imgs_folder_path = path + "/" + "Validation"
-    val_masks_folder_path = val_imgs_folder_path + "_GT_masks"
-    test_imgs_folder_path = path + "/" + "Test"
-    test_masks_folder_path = val_imgs_folder_path + "_GT_masks"
+def turn_npy(path, save_path):
+    images_folder_path = path + "/ISIC-2017_Training_Data"
+    masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"
+    val_imgs_folder_path = path + "/ISIC-2017_Validation_Data"
+    val_masks_folder_path = path + "ISIC-2017_Validation_Part1_GroundTruth"
+    test_imgs_folder_path = path + "/ISIC-2017_Test_v2_Data"
+    test_masks_folder_path = path + "/ISIC-2017_Test_v2_Part1_GroundTruth"
 
     train_X = turn_npy_imgs(images_folder_path)
     train_y, train_y1 = turn_npy_masks(masks_folder_path)
@@ -89,6 +91,6 @@ def turn_npy(path):
     np.save(save_path + '/dataMasktest.npy', test_y)
 
     
-path = "/var/tmp/mi714/aug17"
-save_path = "/var/tmp/mi714/test_new_npy2"
-turn_npy(path)
+path = "/var/tmp/mi714/NEW/aug_dataset"
+save_path = "/var/tmp/mi714/NEW/npy_dataset"
+turn_npy(path, save_path)
