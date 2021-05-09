@@ -1,40 +1,23 @@
 import os
 from os.path import splitext
 from os import listdir
-import glob
-import logging
 import random
-import shutil
-import math
 import cv2
 import csv
 
 import pandas as pd
-from sklearn import model_selection
-from torch.utils.data import Dataset
 import numpy as np
 
 from tqdm import tqdm
 from PIL import Image, ImageFile
 from joblib import Parallel, delayed
 import albumentations as A
-from albumentations.augmentations import transforms
-
-from torchvision import transforms
-import torch
 
 
 
 # Make PIL tolerant of uneven images block sizes.
 ImageFile.LOAD_TRUCATED_IMAGES = True
 
-
-# Configure logging's details
-logging.basicConfig(
-    filename="data_process.log",
-    level=logging.INFO,
-    format="%(asctime)s:%(levelname)s:%(message)s",
-)
 
 
 def del_superpixels(input_path, jobs):
@@ -55,7 +38,7 @@ def del_superpixels(input_path, jobs):
         delayed(os.remove)(str(input_path + "/" + str(image + ".png")))
         for image in tqdm(images)
     )
-    logging.info(f"Succesfully deleted {len(images)} SUPERPIXEL images.")
+    
 
 
 def grey_resize(image_id, images_folder_path, masks_folder_path):
@@ -278,7 +261,6 @@ def augment_dataset(images_folder_path, masks_folder_path, csv_file_path, jobs, 
         for image in tqdm(images)
     )
 
-    logging.info(f"Succesfully augmented {len(images)} images.")
 
 
 def convert(image, folder):
