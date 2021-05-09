@@ -55,6 +55,32 @@ def train_val_split(path):
     test_y, test_y1 = turn_npy_masks(test_masks_folder_path)
 
 
+    train_X = train_X.astype('float32')
+    val_X = val_X.astype('float32')
+    test_X = test_X.astype('float32')
+
+    mean = np.mean(train_X)  # mean for data centering
+    std = np.std(train_X)  # std for data normalization
+
+    train_X -= mean
+    train_X /= std
+
+    val_X -= mean 
+    val_X /= std
+
+    test_X /= std
+    test_X -= mean 
+
+    trainMask = trainMask.astype('float32')
+    trainMask /= 255.  # scale masks to [0, 1]
+
+    valMask = valMask.astype('float32')
+    valMask /= 255.  # scale masks to [0, 1]
+
+    testMask = testMask.astype('float32')
+    testMask /= 255.  # scale masks to [0, 1]
+
+
     np.save('/var/tmp/mi714/test_new_npy2/data.npy',train_X)
     np.save('/var/tmp/mi714/test_new_npy2/dataMask.npy',train_y)
     np.save('/var/tmp/mi714/test_new_npy2/dataval.npy', val_X)

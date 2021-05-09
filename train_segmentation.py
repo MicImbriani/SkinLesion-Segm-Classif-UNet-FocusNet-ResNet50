@@ -25,23 +25,7 @@ trainMask = np.load('/var/tmp/mi714/test_new_npy2/dataMask.npy')
 valData = np.load('/var/tmp/mi714/test_new_npy2/dataval.npy')
 valMask = np.load('/var/tmp/mi714/test_new_npy2/dataMaskval.npy')
 
-trainData = trainData.astype('float32')
-mean = np.mean(trainData)  # mean for data centering
-std = np.std(trainData)  # std for data normalization
 
-valData = valData.astype('float32')
-
-trainData -= mean
-trainData /= std
-
-valData -= mean 
-valData /= std
-
-trainMask = trainMask.astype('float32')
-trainMask /= 255.  # scale masks to [0, 1]
-
-valMask = valMask.astype('float32')
-valMask /= 255.  # scale masks to [0, 1]
 
 
 # CHANGE FOLDER NAMES TO "ISIC-2017_Training_Data"
