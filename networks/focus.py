@@ -27,31 +27,6 @@ def initial_conv_block(weight_decay=5e-4):
     return f
 
 
-
-#def _bn_Lrelu(input):
-#    """Helper to build a BN -> relu block
-#    """
-#    norm = BatchNormalization(axis=3, freeze=False)(input)
-#    return LeakyReLU()(norm)
-#
-#def _conv_bn_Lrelu(**conv_params):
-#    """Helper to build a conv -> BN -> relu block
-#    """
-#    filters = conv_params["filters"]
-#    kernel_size = conv_params["kernel_size"]
-#    strides = conv_params.setdefault("strides", (1, 1))
-#    kernel_initializer = conv_params.setdefault("kernel_initializer", "he_normal")
-#    padding = conv_params.setdefault("padding", "same")
-#    kernel_regularizer = conv_params.setdefault("kernel_regularizer", l2(1.e-4))
-#
-#    def f(input):
-#        conv = Conv2D(filters=filters, kernel_size=kernel_size,
-#                      strides=strides, padding=padding,
-#                      kernel_initializer=kernel_initializer,
-#                      kernel_regularizer=kernel_regularizer)(input)
-#        return _bn_Lrelu(conv)
-#
-#    return f
     
 
 def basic_2d(filters, block=0, stride=None):
@@ -78,62 +53,16 @@ def basic_2d(filters, block=0, stride=None):
         return y
     return f
 
-def branch(filters):#, dilationrate1D, dilationrate2D):
-    
-    def f(input):
-        b = Conv1D(filters=filters, kernel_size=1,
-                   strides=1, padding="same",
-                   #dilation_rate=dilationrate1D,
-                   kernel_initializer="he_normal",
-                   kernel_regularizer=l2(1e-4))(input)
-        b = BatchNormalization(axis=3)(b)
-        b = LeakyReLU()(b)
-        b_res = b
-    
-        b = Conv1D(filters=filters, kernel_size=1,
-                   strides=1, padding="same",
-                   kernel_initializer="he_normal",
-                   kernel_regularizer=l2(1e-4))(b)
-        b = BatchNormalization(axis=3)(b)
-    
-        b_attention = Activation("softmax")(b)
-        
-        b = Conv2D(filters=filters, kernel_size=3,
-                   strides=(1,1), padding="same",
-                   #dilation_rate=dilationrate2D,
-                   kernel_initializer="he_normal",
-                   kernel_regularizer=l2(1e-4))(b)
-        b = BatchNormalization(axis=3)(b)
-        b = Multiply()([b, b_attention])
-        b = LeakyReLU()(b)
-    
-        b = Conv1D(filters=filters, kernel_size=1,
-                   strides=1, padding="same",
-                   kernel_initializer="he_normal",
-                   kernel_regularizer=l2(1e-4))(b)
-        b = BatchNormalization(axis=3)(b)
-        b = Add()([b, b_res])
-        b = LeakyReLU()(b)
-    
-        return b
-    return f
 
 def focusnetAlphaLayer(filters):
     
     def f(input):
-        print("#############")
-        print(input.shape)
         x = Conv2D(filters=filters, kernel_size=3,
                    strides=1, padding="same",
                    kernel_initializer="he_normal",
                    kernel_regularizer=l2(1e-4))(input)
         x = BatchNormalization(axis=3)(x)
         x = LeakyReLU()(x)
-        print(x.shape)
-        
-        #x1 = branch(filters//3)(x)#, dilationrate1D=1, dilationrate2D=(1,1))(x)
-        #x2 = branch(filters//3)(x)#, dilationrate1D=2, dilationrate2D=(2,2))(x)
-        #x3 = branch(filters//3)(x)#, dilationrate1D=3, dilationrate2D=(3,3))(x)
         
         #x_concatenated = Concatenate()([x1,x2,x3], axis=3)
         
@@ -145,8 +74,6 @@ def focusnetAlphaLayer(filters):
         x = squeeze_excite_block(x)
         x_res = input
         x_res = Conv2D(filters=filters, kernel_size=1, strides=1, padding="same", kernel_initializer="he_normal")(x_res)
-        print(x.shape)
-        print(x_res.shape)
         x = Add()([x, x_res])
         
         x =  LeakyReLU()(x)
