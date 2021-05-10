@@ -186,6 +186,8 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
         img_1_mask.save(
             masks_folder_path + "/" + image_id + "_segmentation" + "x1" + ".png", "PNG", quality=100)
         
+        grey_resize(image_id, images_folder_path, masks_folder_path)
+        
         return
         
     else:
@@ -295,43 +297,45 @@ def convert_format(folder, jobs, train_or_val):
 
 
 def generate_dataset(path, n_jobs):
-    images_folder_path = path + "/ISIC-2017_Training_Data"
-    masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"
+    # images_folder_path = path + "/ISIC-2017_Training_Data"
+    # masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"
 
-    csv_suffix = "_GT_result.csv"
+    # csv_suffix = "_GT_result.csv"
 
-    csv_file_path = path + "/Train_GT_result.csv"
+    # csv_file_path = path + "/Train_GT_result.csv"
 
-    # Delete superpixels.
-    del_superpixels(images_folder_path, n_jobs)
+    # # Delete superpixels.
+    # del_superpixels(images_folder_path, n_jobs)
 
-    convert_format(images_folder_path, 8, "Train")
+    # convert_format(images_folder_path, 8, "Train")
 
-    # Delete metadata file.
-    try:
-        os.remove(images_folder_path + "/ISIC-2017_Training_Data_metadata.csv")
-    except: 
-        pass
+    # # Delete metadata file.
+    # try:
+    #     os.remove(images_folder_path + "/ISIC-2017_Training_Data_metadata.csv")
+    # except: 
+    #     pass
 
-    # Create new .csv file with seeds 
-    with open('seeds.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["ID", "seed"])
+    # # Create new .csv file with seeds 
+    # with open('seeds.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(["ID", "seed"])
 
-    # Augment with relative masks.
-    augment_dataset(
-        images_folder_path,
-        masks_folder_path,
-        csv_file_path,
-        n_jobs,
-        "Train"
-    )
+    # # Augment with relative masks.
+    # augment_dataset(
+    #     images_folder_path,
+    #     masks_folder_path,
+    #     csv_file_path,
+    #     n_jobs,
+    #     "Train"
+    # )
 
     ######################
     # VALIDATION 
     
     valimages_folder_path = path + "/ISIC-2017_Validation_Data"
     valmasks_folder_path = path + "/ISIC-2017_Validation_Part1_GroundTruth"
+
+    csv_file_path = path + "/Validation_GT_result"
 
     # Delete superpixels.
     del_superpixels(valimages_folder_path, n_jobs)
@@ -385,5 +389,5 @@ def process_test_set(path, n_jobs):
 if __name__ == "__main__":
     path = "D:/Users/imbrm/ISIC_2017_new"
 
-    #generate_dataset(path, 5)
-    process_test_set(path, 5)
+    generate_dataset(path, 5)
+    #process_test_set(path, 5)

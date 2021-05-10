@@ -19,22 +19,20 @@ from keras.metrics import MeanIoU
 
 
 
-trainData = np.load('/var/tmp/mi714/test_new_npy2/data.npy')
-trainMask = np.load('/var/tmp/mi714/test_new_npy2/dataMask.npy')
+trainData = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
+trainMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMask.npy')
 
-valData = np.load('/var/tmp/mi714/test_new_npy2/dataval.npy')
-valMask = np.load('/var/tmp/mi714/test_new_npy2/dataMaskval.npy')
-
-
-
-
-# CHANGE FOLDER NAMES TO "ISIC-2017_Training_Data"
+valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
+valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
 
 
 
-model_name = "focusnet_v2"
 
-path = "/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/focusnet_v2/focusnet_v2/"
+
+
+model_name = "focusnet"
+
+path = "/var/tmp/mi714/NEW/models/focusnet/"
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
@@ -44,7 +42,7 @@ os.makedirs(path, exist_ok=True)
 # model = focusnet()
 model = get_focusnetAlpha()
 
-my_adam = Adam(lr=0.000001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
+my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
 
 model.compile(optimizer=my_adam,
@@ -74,8 +72,8 @@ callbacks = [
                 mode='min',
                 min_delta=0.01,
                 cooldown=0,
-                min_lr=0.5e-7,
-                factor=0.5,
+                min_lr=1e-7,
+                factor=0.2,
                 patience=5,
                 verbose=1
                 )]
