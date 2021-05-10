@@ -26,6 +26,11 @@ valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
 valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
 
 
+trainMask = trainMask.astype('float32')
+trainMask /= 255.  # scale masks to [0, 1]
+
+valMask = valMask.astype('float32')
+valMask /= 255.  # scale masks to [0, 1]
 
 
 
@@ -46,7 +51,7 @@ my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
 
 model.compile(optimizer=my_adam,
-                loss=metrics.dice_coef_loss,
+                loss=metrics.focal_loss,
                 metrics=[metrics.dice_coef_loss,
                         metrics.jaccard_coef_loss,
                         metrics.true_positive,
@@ -81,7 +86,7 @@ callbacks = [
 history = model.fit(trainData,
                     trainMask,
                     batch_size=6,
-                    epochs=50,
+                    epochs=100,
                     verbose=1,
                     validation_data=(valData, valMask),
                     shuffle=True,
