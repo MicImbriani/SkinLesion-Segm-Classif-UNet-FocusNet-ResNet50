@@ -1,13 +1,11 @@
 import os
 #os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 
-# from networks.unet_nn import unet
-# from networks.focusnet_nn import focusnet
+from networks.unet_nn import unet
 # from networks.unet_res_se_nn import unet_res_se
-from networks.focus import get_focusnetAlpha
+# from networks.focus import get_focusnetAlpha
 
 import metrics
-#import data_process
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -35,23 +33,23 @@ valMask /= 255.  # scale masks to [0, 1]
 
 
 
-model_name = "focusnet"
+model_name = "unet"
 
-path = "/var/tmp/mi714/NEW/models/focusnet/"
+path = "/var/tmp/mi714/NEW/models/unet/"
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
-#model = unet(batch_norm=False)
+model = unet(batch_norm=False)
 # model = unet(batch_norm=True)
 # model = unet_res_se()
 # model = focusnet()
-model = get_focusnetAlpha()
+# model = get_focusnetAlpha()
 
 my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
 
 model.compile(optimizer=my_adam,
-                loss=metrics.focal_loss,
+                loss=metrics.dice_coef_loss,
                 metrics=[metrics.dice_coef_loss,
                         metrics.jaccard_coef_loss,
                         metrics.true_positive,

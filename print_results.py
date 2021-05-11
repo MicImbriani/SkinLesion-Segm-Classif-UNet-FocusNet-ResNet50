@@ -21,7 +21,7 @@ from networks.focus import get_focusnetAlpha
 # #model.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_polished/unet_polished_weights.h5")
 #Focusnet
 model = get_focusnetAlpha()
-model.load_weights("/var/tmp/mi714/NEW/models/focusnet/focusnet_weights.h5")
+model.load_weights("/var/tmp/mi714/NEW/models/focusnet_dice/focusnet_dice_weights.h5")
 
 
 # trainData = np.load('/var/tmp/mi714/test_new_npy2/data.npy')
@@ -30,47 +30,39 @@ model.load_weights("/var/tmp/mi714/NEW/models/focusnet/focusnet_weights.h5")
 # valData = np.load('/var/tmp/mi714/test_new_npy2/dataval.npy')
 # valMask = np.load('/var/tmp/mi714/test_new_npy2/dataMaskval.npy')
 
-# testData = np.load('/var/tmp/mi714/test_new_npy2/datatest.npy')
-# testMask = np.load('/var/tmp/mi714/test_new_npy2/dataMasktest.npy')
+testData = np.load('/var/tmp/mi714/NEW/npy_dataset/datatest.npy')
+testMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMasktest.npy')
 
-valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
-valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
+# trainMask = trainMask.astype('float32')
+# trainMask /= 255.  # scale masks to [0, 1]
+
+X = testData
+y = testMask
+
+X = X.astype('float32')
+y /= 255.  # scale masks to [0, 1]
 
 
-# my_adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
-# model.compile(optimizer=my_adam,
-#                 loss=metrics.dice_coef_loss,
-#                 metrics=[metrics.dice_coef_loss,
-#                         metrics.jaccard_coef_loss,
-#                         metrics.true_positive,
-#                         metrics.true_negative,
-#                         ])
+my_adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
+model.compile(optimizer=my_adam,
+                loss=metrics.focal_loss,
+                metrics=[metrics.dice_coef_loss,
+                        metrics.jaccard_coef_loss,
+                        metrics.true_positive,
+                        metrics.true_negative,
+                        ])
 
-# score = model.evaluate(valData, valMask, verbose=1)
-# dice_coef_loss = score[0]
-# jac_indx_loss = score[1]
-# true_positive = score[2]
-# true_negative = score[3]
-# acc = score[4]
+score = model.evaluate(X, y, verbose=1)
+dice_coef_loss = score[1]
+jac_indx_loss = score[2]
+true_positive = score[3]
+true_negative = score[4]
 
-# print(f"""
-# RESULTS: 
-# Dice Coefficient Loss: {dice_coef_loss}
-# Jaccard Index Loss: {jac_indx_loss}
-# True Positive: {true_positive}
-# True Negative: {true_negative}
-# """)
-##########################################################
-save_path = "/var/tmp/mi714/NEW/predictions/focusnet"
-from PIL import Image
-oi = valData[143]
-img = np.asarray(oi, dtype=np.float32)
-print(img.shape)
-print(img[127][123][0])
-#img = img[:,:,0]
-print(img.shape)
-img = Image.fromarray(img)
-img = img.convert("L")
-print("#########")
-#img.save(save_path + "/asd.png")
 
+print(f"""
+RESULTS: 
+Dice Coefficient Loss: {dice_coef_loss}
+Jaccard Index Loss: {jac_indx_loss}
+True Positive: {true_positive}
+True Negative: {true_negative}
+""")

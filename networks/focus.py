@@ -138,3 +138,10 @@ def get_focusnetAlpha():
 
     return model
 
+if __name__ == "__main__":
+    import tensorflow as tf
+    image = tf.random.uniform((1,256,256,1), 0, 255)
+    model = get_focusnetAlpha()
+    lol = model(image)
+    print(lol)
+    print(lol.shape)
