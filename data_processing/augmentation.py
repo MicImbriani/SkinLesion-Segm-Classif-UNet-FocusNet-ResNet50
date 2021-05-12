@@ -13,70 +13,13 @@ from PIL import Image, ImageFile
 from joblib import Parallel, delayed
 import albumentations as A
 
+from data_processing.data_process import grey_resize, get_result
+
 
 
 # Make PIL tolerant of uneven images block sizes.
 ImageFile.LOAD_TRUCATED_IMAGES = True
 
-
-
-def del_superpixels(input_path, jobs):
-    """Deletes the superpixels images of the skin lesions.
-
-    Args:
-        input_path (string): Path of the folder containing the superpixel images.
-        jobs (string): Number of jobs to be used for parallelisation.
-    """
-    # Store the IDs of all the _superpixel images in a list.
-    images = [
-        splitext(file)[0]
-        for file in listdir(input_path)
-        if "_superpixels" in splitext(file)[0]
-    ]
-    print("Deleting Superpixel Images:")
-    Parallel(n_jobs=jobs)(
-        delayed(os.remove)(str(input_path + "/" + str(image + ".png")))
-        for image in tqdm(images)
-    )
-    
-
-
-def grey_resize(image_id, images_folder_path, masks_folder_path):
-    image = cv2.imread(images_folder_path + "/" + image_id + ".png", 0)
-    mask = cv2.imread(masks_folder_path + "/" + image_id + "_segmentation" + ".png", 0)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-    
-    transform = A.Compose([
-        A.Resize(256,256),
-        A.ToGray(p=1),
-    ])
-
-    transformed = transform(image=image, mask=mask)
-    new_img = transformed['image']
-    new_img_mask = transformed['mask']
-
-    new_img = Image.fromarray(new_img)
-    new_img_mask = Image.fromarray(new_img_mask)
-
-    new_img.save(images_folder_path + "/" + image_id + ".png", "PNG", quality=100)
-    new_img_mask.save(masks_folder_path + "/" + image_id + "_segmentation"  + ".png", "PNG", quality=100)
-
-
-def get_result(image_id, csv_file_path):
-    """Checks whether the inputted image was a melanoma or not.
-
-    Args:
-        image_id (string): ID of the image.
-        csv_file_path (string): Path leading to the .csv file with ground truth.
-
-    Returns:
-        melanoma (int): The melanoma classification result in 0 or 1.
-    """
-    df = pd.read_csv(csv_file_path)
-    img_index = df.loc[df["image_id"] == image_id].index[0]
-    melanoma = df.at[img_index, "melanoma"]
-    return melanoma
 
 
 def augment_operations(image_id, image_folder_path, mask_folder_path, train_val, x):
@@ -240,9 +183,6 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
         grey_resize(image_id, images_folder_path, masks_folder_path)
 
 
-
-
-
 def augment_dataset(images_folder_path, masks_folder_path, csv_file_path, jobs, train_val):
     """Performs augmentation on the whole dataset.
     Augmentation is performed in parallel to speed up process.
@@ -263,131 +203,4 @@ def augment_dataset(images_folder_path, masks_folder_path, csv_file_path, jobs, 
         for image in tqdm(images)
     )
 
-
-
-def convert(image, folder):
-    """Parallelisable function for converting all the images from JPEG to PNG format.
-
-    Args:
-        image (string): Image ID to convert.
-        folder (string): Path of the folder containing images to convert.
-    """  
-    try:  
-        img = Image.open(folder + "/" + image + ".jpg")
-        img.save(folder + "/" + image + ".png")
-        os.remove(folder + "/" + image + ".jpg")
-    except:
-        pass
-
-
-def convert_format(folder, jobs, train_or_val):
-    """Converts all the images from JPEG to PNG format.
-
-    Args:
-        folder (string): Path of the folder containing images to convert.
-        jobs (int): Number of jobs for parallelisation.
-        train_or_val (string): Specifies whether it's Train or Validation images.
-    """    
-    images = [splitext(file)[0] for file in listdir(folder)]
-    print(f"Converting {train_or_val} from JPEG to PNG.")
-    Parallel(n_jobs=jobs)(
-        delayed(convert)(image, folder)
-        for image in tqdm(images)
-    )
-
-
-def generate_dataset(path, n_jobs):
-    # images_folder_path = path + "/ISIC-2017_Training_Data"
-    # masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"
-
-    # csv_suffix = "_GT_result.csv"
-
-    # csv_file_path = path + "/Train_GT_result.csv"
-
-    # # Delete superpixels.
-    # del_superpixels(images_folder_path, n_jobs)
-
-    # convert_format(images_folder_path, 8, "Train")
-
-    # # Delete metadata file.
-    # try:
-    #     os.remove(images_folder_path + "/ISIC-2017_Training_Data_metadata.csv")
-    # except: 
-    #     pass
-
-    # # Create new .csv file with seeds 
-    # with open('seeds.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow(["ID", "seed"])
-
-    # # Augment with relative masks.
-    # augment_dataset(
-    #     images_folder_path,
-    #     masks_folder_path,
-    #     csv_file_path,
-    #     n_jobs,
-    #     "Train"
-    # )
-
-    ######################
-    # VALIDATION 
-    
-    valimages_folder_path = path + "/ISIC-2017_Validation_Data"
-    valmasks_folder_path = path + "/ISIC-2017_Validation_Part1_GroundTruth"
-
-    csv_file_path = path + "/Validation_GT_result"
-
-    # Delete superpixels.
-    del_superpixels(valimages_folder_path, n_jobs)
-
-    # Delete metadata file.
-    try:
-        os.remove(valimages_folder_path + "/" + "ISIC-2017_Validation_Data_metadata.csv")
-    except: 
-        pass
-
-    # Create new .csv file with seeds for validation data
-    with open('seedval.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["ID", "seed"])
-
-    convert_format(valimages_folder_path, 8, "Validation")
-
-    # Augment with relative masks.
-    augment_dataset(
-        valimages_folder_path,
-        valmasks_folder_path,
-        csv_file_path,
-        n_jobs,
-        "Validation"
-    )
-
-
-def process_test_set(path, n_jobs):
-    images_folder_path = path + "/ISIC-2017_Test_v2_Data"
-    masks_folder_path = path + "/ISIC-2017_Test_v2_Part1_GroundTruth"
-
-    # Delete superpixels.
-    del_superpixels(images_folder_path, n_jobs)
-
-    # Delete metadata file.
-    try:
-        os.remove(images_folder_path + "/" + "ISIC-2017_Test_v2_Data_metadata.csv")
-    except: 
-        pass
-
-    # Convert JPEG to PNG
-    convert_format(images_folder_path, 8, "Test")
-
-    images = listdir(images_folder_path)
-    for image_id in images:
-        image_id = splitext(image_id)[0]
-        grey_resize(image_id, images_folder_path, masks_folder_path)
-
-
-
-if __name__ == "__main__":
-    path = "D:/Users/imbrm/ISIC_2017_new"
-
-    generate_dataset(path, 5)
-    #process_test_set(path, 5)
+############################################################################################
