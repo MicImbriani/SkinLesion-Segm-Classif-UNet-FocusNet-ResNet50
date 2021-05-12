@@ -14,11 +14,8 @@ from joblib import Parallel, delayed
 import albumentations as A
 
 
-
-
 # Make PIL tolerant of uneven images block sizes.
 ImageFile.LOAD_TRUCATED_IMAGES = True
-
 
 
 def del_superpixels(input_path, jobs):
@@ -41,28 +38,27 @@ def del_superpixels(input_path, jobs):
     )
 
 
-
 def grey_resize(image_id, images_folder_path, masks_folder_path):
     image = cv2.imread(images_folder_path + "/" + image_id + ".png", 0)
     mask = cv2.imread(masks_folder_path + "/" + image_id + "_segmentation" + ".png", 0)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-    
-    transform = A.Compose([
-        A.Resize(256,256),
-        A.ToGray(p=1),
-    ])
+
+    transform = A.Compose([A.Resize(256, 256), A.ToGray(p=1),])
 
     transformed = transform(image=image, mask=mask)
-    new_img = transformed['image']
-    new_img_mask = transformed['mask']
+    new_img = transformed["image"]
+    new_img_mask = transformed["mask"]
 
     new_img = Image.fromarray(new_img)
     new_img_mask = Image.fromarray(new_img_mask)
 
     new_img.save(images_folder_path + "/" + image_id + ".png", "PNG", quality=100)
-    new_img_mask.save(masks_folder_path + "/" + image_id + "_segmentation"  + ".png", "PNG", quality=100)
-
+    new_img_mask.save(
+        masks_folder_path + "/" + image_id + "_segmentation" + ".png",
+        "PNG",
+        quality=100,
+    )
 
 
 def get_result(image_id, csv_file_path):
@@ -81,17 +77,14 @@ def get_result(image_id, csv_file_path):
     return melanoma
 
 
-
-
-
 def convert(image, folder):
     """Parallelisable function for converting all the images from JPEG to PNG format.
 
     Args:
         image (string): Image ID to convert.
         folder (string): Path of the folder containing images to convert.
-    """  
-    try:  
+    """
+    try:
         img = Image.open(folder + "/" + image + ".jpg")
         img.save(folder + "/" + image + ".png")
         os.remove(folder + "/" + image + ".jpg")
@@ -106,10 +99,7 @@ def convert_format(folder, jobs, train_or_val):
         folder (string): Path of the folder containing images to convert.
         jobs (int): Number of jobs for parallelisation.
         train_or_val (string): Specifies whether it's Train or Validation images.
-    """    
+    """
     images = [splitext(file)[0] for file in listdir(folder)]
     print(f"Converting {train_or_val} from JPEG to PNG.")
-    Parallel(n_jobs=jobs)(
-        delayed(convert)(image, folder)
-        for image in tqdm(images)
-    )
+    Parallel(n_jobs=jobs)(delayed(convert)(image, folder) for image in tqdm(images))

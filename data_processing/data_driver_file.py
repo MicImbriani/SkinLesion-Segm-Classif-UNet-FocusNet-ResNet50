@@ -23,29 +23,24 @@ def generate_dataset(path, n_jobs):
     # Delete metadata file.
     try:
         os.remove(images_folder_path + "/ISIC-2017_Training_Data_metadata.csv")
-    except: 
+    except:
         pass
 
-    # Create new .csv file with seeds 
-    with open('seeds.csv', 'w', newline='') as file:
+    # Create new .csv file with seeds
+    with open("seeds.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["ID", "seed"])
 
     # Augment with relative masks.
     augment_dataset(
-        images_folder_path,
-        masks_folder_path,
-        csv_file_path,
-        n_jobs,
-        "Train"
+        images_folder_path, masks_folder_path, csv_file_path, n_jobs, "Train"
     )
 
     print("Training Complete.")
 
-
     ######################
-    # VALIDATION 
-    
+    # VALIDATION
+
     # Generate Validation paths.
     valimages_folder_path = path + "/ISIC-2017_Validation_Data"
     valmasks_folder_path = path + "/ISIC-2017_Validation_Part1_GroundTruth"
@@ -59,26 +54,23 @@ def generate_dataset(path, n_jobs):
 
     # Delete metadata file.
     try:
-        os.remove(valimages_folder_path + "/" + "ISIC-2017_Validation_Data_metadata.csv")
-    except: 
+        os.remove(
+            valimages_folder_path + "/" + "ISIC-2017_Validation_Data_metadata.csv"
+        )
+    except:
         pass
 
     # Create new .csv file with seeds for validation data
-    with open('seedval.csv', 'w', newline='') as file:
+    with open("seedval.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["ID", "seed"])
 
     # Augment with relative masks.
     augment_dataset(
-        valimages_folder_path,
-        valmasks_folder_path,
-        csv_file_path,
-        n_jobs,
-        "Validation"
+        valimages_folder_path, valmasks_folder_path, csv_file_path, n_jobs, "Validation"
     )
 
     print("Validation Complete.")
-
 
     ######################
     # TEST
@@ -91,7 +83,7 @@ def generate_dataset(path, n_jobs):
     # Delete metadata file.
     try:
         os.remove(images_folder_path + "/" + "ISIC-2017_Test_v2_Data_metadata.csv")
-    except: 
+    except:
         pass
 
     # Convert JPEG to PNG
@@ -103,9 +95,6 @@ def generate_dataset(path, n_jobs):
         grey_resize(image_id, images_folder_path, masks_folder_path)
 
     print("Test Complete.")
-
-
-
 
 
 if __name__ == "__main__":

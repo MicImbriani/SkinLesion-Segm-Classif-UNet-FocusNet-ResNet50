@@ -1,16 +1,16 @@
 import os, glob
 import cv2
-#from keras.backend.cntk_backend import dtype
+
+# from keras.backend.cntk_backend import dtype
 import numpy as np
 from keras.preprocessing.image import img_to_array
 from os.path import splitext
 from os import listdir
 from PIL import Image
+
 # from networks.unet_nn import unet
 # from networks.unet_res_se_nn import unet_res_se
 # from networks.focus import get_focusnetAlpha
-
-
 
 
 def divide_imgs_by_class(path):
@@ -28,11 +28,10 @@ def divide_imgs_by_class(path):
     test_no_mel_path = test_path + "/no_melanoma"
     test_mel_path = test_path + "/melanoma"
 
-
     sets = ["Train", "Validation", "Test"]
     for set in sets:
-        images = [file for file in listdir(path +"/"+set) if not "melanoma" in file]
-        csv_path = path + "/"+set +"_GT_result.csv"
+        images = [file for file in listdir(path + "/" + set) if not "melanoma" in file]
+        csv_path = path + "/" + set + "_GT_result.csv"
         for image in sorted(images):
             image_id = splitext(image)[0]
             res = get_result(image_id, csv_path)
@@ -41,12 +40,9 @@ def divide_imgs_by_class(path):
             else:
                 savepath = path + "/" + set + "/melanoma"
             os.makedirs(savepath, exist_ok=True)
-            image_path = path + "/" +set + "/" + image
+            image_path = path + "/" + set + "/" + image
             img = Image.open(image_path)
-            img.save(savepath+ "/"+image)
-
-
-
+            img.save(savepath + "/" + image)
 
 
 # path is the path with actual images
@@ -57,28 +53,26 @@ def generate_masks(model, path, save_path):
     # valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
     # valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
 
-    testData = np.load('/var/tmp/mi714/NEW/npy_dataset/datatest.npy')
-    testMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMasktest.npy')
+    testData = np.load("/var/tmp/mi714/NEW/npy_dataset/datatest.npy")
+    testMask = np.load("/var/tmp/mi714/NEW/npy_dataset/dataMasktest.npy")
 
-    #p = focus.predict(trainData)
+    # p = focus.predict(trainData)
     images = [file for file in listdir(path)]
-    #files = os.listdir(path)
+    # files = os.listdir(path)
     for image in images:
         img_id = splitext(image)[0]
-        x = Image.open(path + "/" + image).convert('L')
+        x = Image.open(path + "/" + image).convert("L")
         x = np.asarray(x, dtype=np.float32)
-        x = x[np.newaxis,...]   
-        x = x[...,np.newaxis]
+        x = x[np.newaxis, ...]
+        x = x[..., np.newaxis]
         x = np.asarray(x)
         img = model.predict(x)
-        img = img[0,:,:,:]
+        img = img[0, :, :, :]
         _, img = cv2.threshold(img, 0.5, 255, cv2.THRESH_BINARY)
         img = np.asarray(img, dtype=np.float32)
         img = Image.fromarray(img)
         img = img.convert("L")
         img.save(save_path + "/" + image)
-
-
 
 
 def generate_dataset(pred_masks_path, images_path, save_path):
@@ -92,28 +86,26 @@ def generate_dataset(pred_masks_path, images_path, save_path):
         images_path (string): Path to directory containing images.
         save_path (string): Path to destination folder in which new 
                             cropped images will be saved.
-    """     
+    """
     pred_masks = listdir(pred_masks_path)
     for mask in pred_masks:
-        mask_id = mask 
+        mask_id = mask
         image_id = mask_id.replace("_segmentation", "")
-        
-        mask = Image.open(pred_masks_path+ "/" + mask_id).convert('L')
-        image = Image.open(images_path + "/" + image_id).convert('L')
+
+        mask = Image.open(pred_masks_path + "/" + mask_id).convert("L")
+        image = Image.open(images_path + "/" + image_id).convert("L")
         mask = np.asarray(mask, dtype=np.float32)
         image = np.asarray(image, dtype=np.float32)
 
-        _, mask = cv2.threshold(mask, 127, 1., cv2.THRESH_BINARY)
-        crop = image * mask 
+        _, mask = cv2.threshold(mask, 127, 1.0, cv2.THRESH_BINARY)
+        crop = image * mask
         crop = Image.fromarray(crop)
         crop = crop.convert("L")
         crop.save(save_path + "/" + image_id)
 
 
-
-
 if __name__ == "__main__":
-    #unet = unet((256,256,1), batch_norm=False)
+    # unet = unet((256,256,1), batch_norm=False)
     # unetresse = get_unet()
     # focus = focusnet()
     # model = get_focusnetAlpha()
@@ -128,8 +120,8 @@ if __name__ == "__main__":
     # save_path = "/var/tmp/mi714/NEW/predictions/focusnet/test"
     # generate_new(model, dataset_path, save_path)
 
-
-    generate_dataset(pred_masks_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Part1_GroundTruth",
-                    images_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Data",
-                    save_path="D:/Users/imbrm/ISIC_2017_new/small/delete")
-
+    generate_dataset(
+        pred_masks_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Part1_GroundTruth",
+        images_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Data",
+        save_path="D:/Users/imbrm/ISIC_2017_new/small/delete",
+    )
