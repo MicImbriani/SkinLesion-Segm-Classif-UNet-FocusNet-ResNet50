@@ -8,7 +8,7 @@ from keras.layers import Input, Conv2D, UpSampling2D, Dropout, Activation
 
 from se import squeeze_excite_block
 from layers import initial_conv_block
-from resnet import _conv_bn_relu, _residual_block, basic_block
+from resblock import _conv_bn_relu, _residual_block, basic_block
 
 
 def unet_res_se():

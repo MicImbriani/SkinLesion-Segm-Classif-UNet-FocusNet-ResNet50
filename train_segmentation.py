@@ -3,9 +3,8 @@ import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 
 # from networks.unet_nn import unet
-from networks.unet_res_se_nn import unet_res_se
-
-# from networks.focus import get_focusnetAlpha
+# from networks.unet_res_se_nn import unet_res_se
+from networks.focus import get_focusnetAlpha
 
 import metrics
 import numpy as np
@@ -37,16 +36,16 @@ valMask = valMask.astype("float32")
 valMask /= 255.0  # scale masks to [0, 1]
 
 
-model_name = "unet_res_se"
+model_name = "focusnet3"
 
-path = "/var/tmp/mi714/NEW/models/unet_res_se/"
+path = "/var/tmp/mi714/NEW/models/FOCUS/focusnet3/"
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
-# model = unet(batch_norm=False)
 # model = unet(batch_norm=True)
-model = unet_res_se()
-# model = get_focusnetAlpha()
+# model = unet(batch_norm=True)
+# model = unet_res_se()
+model = get_focusnetAlpha()
 
 my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
