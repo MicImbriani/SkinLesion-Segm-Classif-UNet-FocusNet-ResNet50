@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Input
+from tensorflow.keras.applications.resnet50 import ResNet50
 
 def get_res():
 

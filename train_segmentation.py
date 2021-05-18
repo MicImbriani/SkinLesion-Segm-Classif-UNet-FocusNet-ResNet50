@@ -36,9 +36,9 @@ valMask = valMask.astype("float32")
 valMask /= 255.0  # scale masks to [0, 1]
 
 
-model_name = "focusnet3"
+model_name = "focusnet10"
 
-path = "/var/tmp/mi714/NEW/models/FOCUS/focusnet3/"
+path = "/var/tmp/mi714/NEW/models/FOCUS/" + model_name
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train

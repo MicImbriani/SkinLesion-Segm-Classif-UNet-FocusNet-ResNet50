@@ -1,24 +1,21 @@
+import os 
 import numpy as np
 import matplotlib.pyplot as plt
 
+import tensorflow as tf
 from tensorflow.keras.metrics import AUC
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-import tensorflow as tf
 from keras.optimizers import Adam, SGD
 
-import tensorflow as tf
-from tf.keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
 from keras.preprocessing.image import ImageDataGenerator
 
 from metrics import (
-    dice_coef_loss,
-    auroc,
-    jaccard_coef_loss,
     true_positive,
     true_negative,
     sensitivity,
     specificity)
-from tf.keras.metrics import AUC
+from networks.resnet import get_res
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.optimizers import Adam, SGD
@@ -28,9 +25,9 @@ from keras.optimizers import Adam, SGD
 
 
 # Folders with images divided by diagnosis result
-path = "/var/tmp/mi714/NEW/aug_dataset"
-train_path = path + ""
-val_path = path + ""
+path = "/var/tmp/mi714/NEW/classif_dataset"
+train_path = path + "/ISIC-2017_Training_Data"
+val_path = path + "/ISIC-2017_Validation_Data"
 
 image_size = 256
 bs = 8
@@ -60,13 +57,13 @@ validation_generator = data_generator.flow_from_directory(
 
 
 
-print((bs, len(train_generator), bs, len(validation_generator)))
+print(len(train_generator), len(validation_generator))
 
 
 
-model_name = "resnet"
+model_name = "resnet_test"
 
-path = ""
+path = "/var/tmp/mi714/NEW/models/RESNETS/" + model_name
 os.makedirs(path, exist_ok=True)
 
 model = get_res()
@@ -121,21 +118,16 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 history = model.fit_generator(
     train_generator,
     # steps_per_epoch=10,
-    epochs=100,
+    epochs=50,
     validation_data=validation_generator,
     # validation_steps=10,
-    callbacks=[checkpoint, reduce_lr, early_stopping],
+    callbacks=[checkpoint,
+               reduce_lr, 
+               early_stopping
+               ],
 )
-# model.load_weights("../working/best.hdf5")
 
-# history = model.fit(trainData,
-#                     trainMask,
-#                     epochs=1,
-#                     batch_size = 6,
-#                     validation_data=(valData, valMask),
-#                     verbose=2)
-
-model.save((path + "/" + model_name + "_model.h5")
+model.save(path + "/" + model_name + "_model.h5")
 
 ## TAKEN FROM
 # https://github.com/bnsreenu/python_for_microscopists/blob/master/203b_skin_cancer_lesion_classification_V4.0.py
