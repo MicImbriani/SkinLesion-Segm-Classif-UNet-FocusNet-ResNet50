@@ -42,18 +42,16 @@ data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
 # flow_From_directory generates batches of augmented data (where augmentation can be color conversion, etc)
 # Both train & valid folders must have NUM_CLASSES sub-folders
 train_generator = data_generator.flow_from_directory(
-    train_path,
-    target_size=(image_size, image_size),
-    batch_size=bs,
-    class_mode="categorical",
-)
+        train_path,
+        target_size=(image_size, image_size),
+        batch_size=bs,
+        class_mode='categorical')
 
 validation_generator = data_generator.flow_from_directory(
-    val_path,
-    target_size=(image_size, image_size),
-    batch_size=bs,
-    class_mode="categorical",
-)
+        val_path,
+        target_size=(image_size, image_size),
+        batch_size=bs,
+        class_mode='categorical') 
 
 
 
@@ -129,14 +127,14 @@ history = model.fit_generator(
 
 model.save(path + "/" + model_name + "_model.h5")
 
-## TAKEN FROM
+## TAKEN FROM 
 # https://github.com/bnsreenu/python_for_microscopists/blob/master/203b_skin_cancer_lesion_classification_V4.0.py
 # # Prediction on test data
 # y_pred = model.predict(x_test)
-# # Convert predictions classes to one hot vectors
-# y_pred_classes = np.argmax(y_pred, axis = 1)
+# # Convert predictions classes to one hot vectors 
+# y_pred_classes = np.argmax(y_pred, axis = 1) 
 # # Convert test data to one hot vectors
-# y_true = np.argmax(y_test, axis = 1)
+# y_true = np.argmax(y_test, axis = 1) 
 
 # #Print confusion matrix
 # cm = confusion_matrix(y_true, y_pred_classes)
@@ -153,41 +151,42 @@ model.save(path + "/" + model_name + "_model.h5")
 # plt.ylabel('Fraction of incorrect predictions')
 
 
+
 # summarize history for accuracy
-plt.plot(history.history["acc"])
-plt.plot(history.history["val_acc"])
-plt.title("model accuracy")
-plt.ylabel("accuracy")
-plt.xlabel("epoch")
-plt.legend(["train", "val"], loc="upper left")
-plt.savefig(path + "accuracy.png")
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig(path + 'accuracy.png')
 plt.clf()
 # summarize history for AUC
-plt.plot(history.history["loss"])
-plt.plot(history.history["val_loss"])
-plt.title("model AUC")
-plt.ylabel("AUC")
-plt.xlabel("epoch")
-plt.legend(["train", "val"], loc="upper left")
-plt.savefig(path + "AUC.png")
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model AUC')
+plt.ylabel('AUC')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig(path + 'AUC.png')
 plt.clf()
 # summarize history for sensitivity
-plt.plot(history.history["sensitivity"])
-plt.plot(history.history["val_sensitivity"])
-plt.title("model sensitivity")
-plt.ylabel("sensitivity")
-plt.xlabel("epoch")
-plt.legend(["train", "val"], loc="upper left")
-plt.savefig(path + "sensitivity.png")
+plt.plot(history.history['sensitivity'])
+plt.plot(history.history['val_sensitivity'])
+plt.title('model sensitivity')
+plt.ylabel('sensitivity')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig(path + 'sensitivity.png')
 plt.clf()
 # summarize history for specificity
-plt.plot(history.history["specificity"])
-plt.plot(history.history["val_specificity"])
-plt.title("model specificity")
-plt.ylabel("specificity")
-plt.xlabel("epoch")
-plt.legend(["train", "val"], loc="upper left")
-plt.savefig(path + "specificity.png")
+plt.plot(history.history['specificity'])
+plt.plot(history.history['val_specificity'])
+plt.title('model specificity')
+plt.ylabel('specificity')
+plt.xlabel('epoch')
+plt.legend(['train', 'val'], loc='upper left')
+plt.savefig(path + 'specificity.png')
 plt.clf()
 
 
