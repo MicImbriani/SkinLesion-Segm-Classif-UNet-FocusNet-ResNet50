@@ -1,19 +1,24 @@
 import os, glob
 import cv2
-#from keras.backend.cntk_backend import dtype
+
 import numpy as np
 from keras.preprocessing.image import img_to_array
 from os.path import splitext
 from os import listdir
 from PIL import Image
-# from networks.unet_nn import unet
-# from networks.unet_res_se_nn import unet_res_se
-# from networks.focus import get_focusnetAlpha
+
+from data_processing.data_process import get_result
 
 
 
 
 def divide_imgs_by_class(path):
+    """Splits images in "melanoma" or "no_melanoma" folders.
+    Uses "get_result()" function to retrieve diagnosis result.
+
+    Args:
+        path (string): Path to folder containing dataset.
+    """    
     # path = "/var/tmp/mi714/class_division"
     train_path = path + "/Train"
     val_path = path + "/Validation"
@@ -51,6 +56,13 @@ def divide_imgs_by_class(path):
 
 # path is the path with actual images
 def generate_masks(model, path, save_path):
+    """Takes a model as input and predicts segmentation masks for each image.
+
+    Args:
+        model (Keras model): Compiled model to use for generating predictions.
+        path (string): Path to folder with images to be predicted.
+        save_path (string): Path to destination folder to save predicted masks.
+    """    
     # trainData = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
     # trainMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMask.npy')
 

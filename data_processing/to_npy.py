@@ -6,6 +6,14 @@ import cv2
 import numpy as np
 
 def turn_npy_imgs(folder_path):    
+    """Turns images to numpy arrays and returns them.
+
+    Args:
+        folder_path (string): Path to images folder.
+
+    Returns:
+        npa (numpy array): Numpy array containing the images.
+    """    
     images = [splitext(file)[0] for file in listdir(folder_path)]
     imgs_array = []
     for image in sorted(images):
@@ -20,6 +28,14 @@ def turn_npy_imgs(folder_path):
     return npa
 
 def turn_npy_masks(folder_path):  
+    """Turn masks to numpy arrays, treshold to 0 or 255 and returns them.
+
+    Args:
+        folder_path (string): Path to masks folder.
+
+    Returns:
+        npa (numpy array): Numpy array containing the masks.
+    """    
     images = [splitext(file)[0] for file in listdir(folder_path)]
     imgs_array = []
     for image in sorted(images):
@@ -35,6 +51,13 @@ def turn_npy_masks(folder_path):
     return npa 
 
 def turn_npy(path, save_path):
+    """Takes root path containing splits of dataset, 
+    converts to numpy and saves in .npy format.
+
+    Args:
+        path (string): Path to dataset.
+        save_path (string): Path to destination folder to save .npy files.
+    """    
     images_folder_path = path + "/ISIC-2017_Training_Data"
     masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"
     val_imgs_folder_path = path + "/ISIC-2017_Validation_Data"

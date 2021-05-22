@@ -43,6 +43,13 @@ def del_superpixels(input_path, jobs):
 
 
 def grey_resize(image_id, images_folder_path, masks_folder_path):
+    """Applies only grey-scale conversion and rescaling.
+
+    Args:
+        image_id (string): ID of image to be transformed.
+        images_folder_path (path): Path to folder with lesion images.
+        masks_folder_path (string): Path to folder with masks.
+    """    
     image = cv2.imread(images_folder_path + "/" + image_id + ".png", 0)
     mask = cv2.imread(masks_folder_path + "/" + image_id + "_segmentation" + ".png", 0)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
