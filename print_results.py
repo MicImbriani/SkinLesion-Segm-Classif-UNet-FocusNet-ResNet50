@@ -3,7 +3,7 @@ import numpy as np
 from keras.optimizers import Adam, SGD
 
 import metrics
-from networks.focusnet_nn import focusnet
+from networks.focus import get_focusnetAlpha
 from networks.unet_nn import unet
 from networks.unet_res_se_nn import unet_res_se
 from networks.focus import get_focusnetAlpha
@@ -12,16 +12,16 @@ from networks.focus import get_focusnetAlpha
 
 # #U-Net
 # model = unet(batch_norm=False)
-# model.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_nobn/unet_nobn1/unet_nobn_weights.h5")
+# model.load_weights("/var/tmp/mi714/NEW/models/UNET/unet8/unet8_weights.h5")
 # #U-Net BatchNorm
 # model = unet(batch_norm=True)
-# #model.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_bn/unet_bn/unet_bn_weights.h5")
+# model.load_weights("/var/tmp/mi714/NEW/models/UNET_BN/unet_bn10/unet_bn10_weights.h5")
 # #U-Net Res SE
 # model = unet_res_se()
-# #model.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_polished/unet_polished_weights.h5")
+# model.load_weights("/var/tmp/mi714/NEW/models/UNET_RES_SE/unet_res_se10/unet_res_se10_weights.h5")
 #Focusnet
 model = get_focusnetAlpha()
-model.load_weights("/var/tmp/mi714/NEW/models/focusnet_dice/focusnet_dice_weights.h5")
+model.load_weights("/var/tmp/mi714/NEW/models/FOCUS/focusnet10/focusnet10_weights.h5")
 
 
 # trainData = np.load('/var/tmp/mi714/test_new_npy2/data.npy')

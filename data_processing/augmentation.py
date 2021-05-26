@@ -120,14 +120,11 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
         train_val (string): Specifies whether it's "Train" or "Validation".
     """
     if train_val == "Validation":
-        img_1, img_1_mask = augment_operations(
-            image_id, images_folder_path, masks_folder_path, train_val, ""
-        )
+        img_1, img_1_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "")
 
         # Save image and mask in two dedicated folders.
         img_1.save(images_folder_path + "/" + image_id + "x1" + ".png", "PNG", quality=100)
-        img_1_mask.save(
-            masks_folder_path + "/" + image_id + "_segmentation" + "x1" + ".png", "PNG", quality=100)
+        img_1_mask.save(masks_folder_path + "/" + image_id + "_segmentation" + "x1" + ".png", "PNG", quality=100)
         
         grey_resize(image_id, images_folder_path, masks_folder_path)
         
@@ -138,18 +135,10 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
 
         if melanoma == 1:
             # Perform augmentations, store the resulting images and masks.
-            img_1, img_1_mask = augment_operations(
-                image_id, images_folder_path, masks_folder_path, train_val, "x1"
-            )
-            img_2, img_2_mask = augment_operations(
-                image_id, images_folder_path, masks_folder_path, train_val, "x2"
-            )
-            img_3, img_3_mask = augment_operations(
-                image_id, images_folder_path, masks_folder_path, train_val, "x3"
-            )
-            img_4, img_4_mask= augment_operations(
-                image_id, images_folder_path, masks_folder_path, train_val, "x4"
-            )
+            img_1, img_1_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "x1")
+            img_2, img_2_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "x2")
+            img_3, img_3_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "x3")
+            img_4, img_4_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "x4")
 
             # Save images in dedicated folder.
             img_1.save(images_folder_path + "/" + image_id + "x1" + ".png", "PNG", quality=100)
@@ -158,18 +147,10 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
             img_4.save(images_folder_path + "/" + image_id + "x4" + ".png", "PNG", quality=100)
 
             # Save masks in dedicated folder.
-            img_1_mask.save(
-                masks_folder_path + "/" + image_id + "_segmentation" + "x1" + ".png", "PNG", quality=100
-            )
-            img_2_mask.save(
-                masks_folder_path + "/" + image_id + "_segmentation" + "x2" + ".png", "PNG", quality=100
-            )
-            img_3_mask.save(
-                masks_folder_path + "/" + image_id + "_segmentation" + "x3" + ".png", "PNG", quality=100
-            )   
-            img_4_mask.save(
-                masks_folder_path + "/" + image_id + "_segmentation" + "x4" + ".png", "PNG", quality=100
-            )
+            img_1_mask.save(masks_folder_path + "/" + image_id + "_segmentation" + "x1" + ".png", "PNG", quality=100)
+            img_2_mask.save(masks_folder_path + "/" + image_id + "_segmentation" + "x2" + ".png", "PNG", quality=100)
+            img_3_mask.save(masks_folder_path + "/" + image_id + "_segmentation" + "x3" + ".png", "PNG", quality=100)   
+            img_4_mask.save(masks_folder_path + "/" + image_id + "_segmentation" + "x4" + ".png", "PNG", quality=100)
 
             # Add new datapoint to .csv file 
             with open(csv_file_path, 'a', newline='') as file:

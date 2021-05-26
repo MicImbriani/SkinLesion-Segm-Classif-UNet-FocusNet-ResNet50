@@ -1,20 +1,18 @@
 import os
 #os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 
-# from networks.unet_nn import unet
-# from networks.unet_res_se_nn import unet_res_se
-from networks.focus import get_focusnetAlpha
-
 import metrics
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-
 from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from keras.metrics import MeanIoU
 
+# from networks.unet_nn import unet
+# from networks.unet_res_se_nn import unet_res_se
+from networks.focus import get_focusnetAlpha
 
 
 trainData = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
@@ -33,13 +31,13 @@ valMask /= 255.  # scale masks to [0, 1]
 
 
 
-model_name = "focusnet10"
+model_name = "focusnet"
 
 path = "/var/tmp/mi714/NEW/models/FOCUS/" + model_name
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
-# model = unet(batch_norm=True)
+# model = unet(batch_norm=False)
 # model = unet(batch_norm=True)
 # model = unet_res_se()
 model = get_focusnetAlpha()

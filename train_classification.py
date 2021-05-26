@@ -34,13 +34,10 @@ bs = 8
 
 
 
-# preprocessing_function is applied on each image but only after re-sizing & augmentation (resize => augment => pre-process)
-# Each of the keras.application.resnet* preprocess_input MOSTLY mean BATCH NORMALIZATION (applied on each batch) stabilize the inputs to nonlinear activation functions
-# Batch Normalization helps in faster convergence
+# Preprocessing_function is applied on each image
 data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-# flow_From_directory generates batches of augmented data (where augmentation can be color conversion, etc)
-# Both train & valid folders must have NUM_CLASSES sub-folders
+# flow_From_directory generates batches of augmented data
 train_generator = data_generator.flow_from_directory(
         train_path,
         target_size=(image_size, image_size),
@@ -59,9 +56,9 @@ print(len(train_generator), len(validation_generator))
 
 
 
-model_name = "resnet_test"
+model_name = "resnet"
 
-path = "/var/tmp/mi714/NEW/models/RESNETS/" + model_name
+path = "/var/tmp/mi714/NEW/models/RESNETS/RESNET_OG/" + model_name
 os.makedirs(path, exist_ok=True)
 
 model = get_res()
@@ -77,8 +74,8 @@ rocauc = AUC(num_thresholds=200,
             label_weights=None,
             )
 
-sgd = SGD(lr = 0.01, decay = 1e-6, momentum = 0.9, nesterov = True)
-my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
+sgd = SGD(lr = 0.00001, decay = 1e-6, momentum = 0.9, nesterov = True)
+my_adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 
 model.compile(loss='categorical_crossentropy',
               optimizer=my_adam,
@@ -113,17 +110,16 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                               verbose=1
                               )
 
-history = model.fit_generator(
-    train_generator,
-    # steps_per_epoch=10,
-    epochs=50,
-    validation_data=validation_generator,
-    # validation_steps=10,
-    callbacks=[checkpoint,
-               reduce_lr, 
-               early_stopping
-               ],
-)
+history = model.fit_generator(train_generator,
+                              # steps_per_epoch=10,
+                              epochs=50,
+                              validation_data=validation_generator,
+                              # validation_steps=10,
+                              callbacks=[checkpoint,
+                                        reduce_lr, 
+                                        early_stopping
+                                        ],
+                                )
 
 model.save(path + "/" + model_name + "_model.h5")
 
