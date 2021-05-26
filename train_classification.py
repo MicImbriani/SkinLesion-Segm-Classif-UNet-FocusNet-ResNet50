@@ -2,13 +2,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-import tensorflow as tf
+import keras
 from tensorflow.keras.metrics import AUC
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.optimizers import Adam, SGD
 
-from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 
 from metrics import (
     true_positive,
@@ -17,42 +16,62 @@ from metrics import (
     specificity)
 from networks.resnet import get_res
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.optimizers import Adam, SGD
+from tensorflow.keras.utils import to_categorical
+from data_processing.data_process import get_result
 
 
 
+def generate_targets(path, csv_path):
+        images = os.listdir(path)
+        images.sort()
+        labels = []
+
+        for image in images:
+                image_id = os.path.splitext(image)[0]
+                temp = get_result(image_id, csv_path)
+                labels.append(temp)
+        labels = np.array(labels)
+        labels = labels[:, np.newaxis]
+
+        y_array = to_categorical(labels, 2)
+        y_array = np.array(y_array)
+        return y_array 
+        
+# Generate target array for train set
+train_path = "/var/tmp/mi714/NEW/ISIC-2017_Training_Data"
+train_csv_path = "/var/tmp/mi714/NEW/ISIC-2017_Training_Part3_GroundTruth.csv"
+# path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Data"
+# csv_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Part3_GroundTruth.csv"
+y_train = generate_targets(train_path, train_csv_path)
+print(y_train.shape)
+
+# Generate target array for validation set
+val_path = "/var/tmp/mi714/NEW/ISIC-2017_Validation_Data"
+val_csv_path = "/var/tmp/mi714/NEW/ISIC-2017_Validation_Part3_GroundTruth.csv"
+# path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Validation_Data"
+# csv_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Validation_Part3_GroundTruth.csv"
+y_val = generate_targets(val_path, val_csv_path)
+print(y_val.shape)
+
+# Load train data and "convert" to RGB by expanding the channel dimension
+x_train = np.load('/var/tmp/mi714/NEW/data.npy')
+# x_train = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
+x_train = np.concatenate((x_train,)*3, axis=-1)
+x_train = preprocess_input(x_train)
+print(x_train.shape)
+
+# Load validation data and "convert" to RGB by expanding the channel dimension
+x_val = np.load('/var/tmp/mi714/NEW/dataval.npy')
+# x_val = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
+x_val = np.concatenate((x_val,)*3, axis=-1)
+x_val = preprocess_input(x_val)
+print(x_val.shape)
+
+# Rescale the pixel values for data normalisation
+x_train /= 255
+x_val /= 255
 
 
-# Folders with images divided by diagnosis result
-path = "/var/tmp/mi714/NEW/classif_dataset"
-train_path = path + "/ISIC-2017_Training_Data"
-val_path = path + "/ISIC-2017_Validation_Data"
-
-image_size = 256
-bs = 8
-
-
-
-# Preprocessing_function is applied on each image
-data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-# flow_From_directory generates batches of augmented data
-train_generator = data_generator.flow_from_directory(
-        train_path,
-        target_size=(image_size, image_size),
-        batch_size=bs,
-        class_mode='categorical')
-
-validation_generator = data_generator.flow_from_directory(
-        val_path,
-        target_size=(image_size, image_size),
-        batch_size=bs,
-        class_mode='categorical') 
-
-
-
-print(len(train_generator), len(validation_generator))
 
 
 
@@ -74,6 +93,7 @@ rocauc = AUC(num_thresholds=200,
             label_weights=None,
             )
 
+
 sgd = SGD(lr = 0.00001, decay = 1e-6, momentum = 0.9, nesterov = True)
 my_adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 
@@ -88,20 +108,20 @@ model.compile(loss='categorical_crossentropy',
 model.summary()
 
 checkpoint = ModelCheckpoint(path + "/" + model_name + "_weights.h5", 
-                             monitor='val_loss',
+                             monitor='val_auc',
                              verbose=1,
                              save_best_only=True,
                              save_weights_only=True,
-                             mode='min'
+                             mode='max'
                              )
 early_stopping = EarlyStopping(patience=10,
-                               monitor='val_loss',
-                               mode='min',
+                               monitor='val_auc',
+                               mode='max',
                                verbose=1,
                                min_delta=0.01
                                )
-reduce_lr = ReduceLROnPlateau(monitor='val_loss',
-                              mode='min',
+reduce_lr = ReduceLROnPlateau(monitor='val_auc',
+                              mode='max',
                               min_delta=0.01,
                               cooldown=0,
                               min_lr=0.5e-7,
@@ -110,41 +130,20 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                               verbose=1
                               )
 
-history = model.fit_generator(train_generator,
-                              # steps_per_epoch=10,
-                              epochs=50,
-                              validation_data=validation_generator,
-                              # validation_steps=10,
-                              callbacks=[checkpoint,
-                                        reduce_lr, 
-                                        early_stopping
-                                        ],
-                                )
+history = model.fit(x_train,
+                y_train,
+                batch_size = 16 ,
+                # steps_per_epoch=10,
+                epochs=50,
+                validation_data=(x_val,y_val),
+                # validation_steps=10,
+                callbacks=[checkpoint,
+                        reduce_lr, 
+                        early_stopping
+                        ],
+                )
 
 model.save(path + "/" + model_name + "_model.h5")
-
-## TAKEN FROM 
-# https://github.com/bnsreenu/python_for_microscopists/blob/master/203b_skin_cancer_lesion_classification_V4.0.py
-# # Prediction on test data
-# y_pred = model.predict(x_test)
-# # Convert predictions classes to one hot vectors 
-# y_pred_classes = np.argmax(y_pred, axis = 1) 
-# # Convert test data to one hot vectors
-# y_true = np.argmax(y_test, axis = 1) 
-
-# #Print confusion matrix
-# cm = confusion_matrix(y_true, y_pred_classes)
-
-# fig, ax = plt.subplots(figsize=(6,6))
-# sns.set(font_scale=1.6)
-# sns.heatmap(cm, annot=True, linewidths=.5, ax=ax)
-
-
-# #PLot fractional incorrect misclassifications
-# incorr_fraction = 1 - np.diag(cm) / np.sum(cm, axis=1)
-# plt.bar(np.arange(7), incorr_fraction)
-# plt.xlabel('True Label')
-# plt.ylabel('Fraction of incorrect predictions')
 
 
 
@@ -184,10 +183,3 @@ plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
 plt.savefig(path + 'specificity.png')
 plt.clf()
-
-
-# preds = model.predict(x)
-# # decode the results into a list of tuples (class, description, probability)
-# # (one such list for each sample in the batch)
-# print('Predicted:', decode_predictions(preds, top=3)[0])
-# # Predicted: [(u'n02504013', u'Indian_elephant', 0.82658225), (u'n01871265', u'tusker', 0.1122357), (u'n02504458', u'African_elephant', 0.061040461)]
