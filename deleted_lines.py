@@ -116,3 +116,43 @@ def make_greyscale(folder_path, jobs):
                     writer.writerow([image_id + "x1", 0, 0])
 
 #############################################################################
+
+def divide_imgs_by_class(path):
+    """Splits images in "melanoma" or "no_melanoma" folders.
+    Uses "get_result()" function to retrieve diagnosis result.
+
+    Args:
+        path (string): Path to folder containing dataset.
+    """    
+    # path = "/var/tmp/mi714/class_division"
+    train_path = path + "/Train"
+    val_path = path + "/Validation"
+    test_path = path + "/Test"
+
+    train_no_mel_path = train_path + "/no_melanoma"
+    train_mel_path = train_path + "/melanoma"
+
+    val_no_mel_path = val_path + "/no_melanoma"
+    val_mel_path = val_path + "/melanoma"
+
+    test_no_mel_path = test_path + "/no_melanoma"
+    test_mel_path = test_path + "/melanoma"
+
+
+    sets = ["Train", "Validation", "Test"]
+    for set in sets:
+        images = [file for file in listdir(path +"/"+set) if not "melanoma" in file]
+        csv_path = path + "/"+set +"_GT_result.csv"
+        for image in sorted(images):
+            image_id = splitext(image)[0]
+            res = get_result(image_id, csv_path)
+            if res == 0:
+                savepath = path + "/" + set + "/no_melanoma"
+            else:
+                savepath = path + "/" + set + "/melanoma"
+            os.makedirs(savepath, exist_ok=True)
+            image_path = path + "/" +set + "/" + image
+            img = Image.open(image_path)
+            img.save(savepath+ "/"+image)
+
+#############################################################################

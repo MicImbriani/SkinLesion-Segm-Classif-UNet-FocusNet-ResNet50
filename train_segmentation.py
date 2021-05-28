@@ -10,41 +10,45 @@ from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from keras.metrics import MeanIoU
 
-# from networks.unet_nn import unet
+from networks.unet_nn import unet
 # from networks.unet_res_se_nn import unet_res_se
-from networks.focus import get_focusnetAlpha
+# from networks.focus import get_focusnetAlpha
 
 
+
+# Load train and validation data and masks
 trainData = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
 trainMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMask.npy')
 
 valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
 valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
 
-
+# Rescale masks in range [0,1]
 trainMask = trainMask.astype('float32')
-trainMask /= 255.  # scale masks to [0, 1]
+trainMask /= 255.
 
 valMask = valMask.astype('float32')
-valMask /= 255.  # scale masks to [0, 1]
+valMask /= 255.
 
 
 
 
-model_name = "focusnet"
+model_name = "unet10"
 
-path = "/var/tmp/mi714/NEW/models/FOCUS/" + model_name
+path = "/var/tmp/mi714/NEW/models/UNET/" + model_name
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
-# model = unet(batch_norm=False)
+model = unet(batch_norm=False)
 # model = unet(batch_norm=True)
 # model = unet_res_se()
-model = get_focusnetAlpha()
+# model = get_focusnetAlpha()
 
+# Optimizers
 my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
 
+# Compile model and print summary
 model.compile(optimizer=my_adam,
                 loss=metrics.dice_coef_loss,
                 metrics=[metrics.dice_coef_loss,
@@ -78,6 +82,7 @@ callbacks = [
                 verbose=1
                 )]
 
+# Train the model
 history = model.fit(trainData,
                     trainMask,
                     batch_size=6,

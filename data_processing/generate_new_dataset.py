@@ -1,60 +1,25 @@
-import os, glob
+import os
+from os.path import splitext
+from os import listdir
+from PIL import Image
 import cv2
 
 import numpy as np
 from keras.preprocessing.image import img_to_array
-from os.path import splitext
-from os import listdir
-from PIL import Image
+from tensorflow.keras.utils import to_categorical
 
-from data_processing.data_process import get_result
-
-
-
-
-def divide_imgs_by_class(path):
-    """Splits images in "melanoma" or "no_melanoma" folders.
-    Uses "get_result()" function to retrieve diagnosis result.
-
-    Args:
-        path (string): Path to folder containing dataset.
-    """    
-    # path = "/var/tmp/mi714/class_division"
-    train_path = path + "/Train"
-    val_path = path + "/Validation"
-    test_path = path + "/Test"
-
-    train_no_mel_path = train_path + "/no_melanoma"
-    train_mel_path = train_path + "/melanoma"
-
-    val_no_mel_path = val_path + "/no_melanoma"
-    val_mel_path = val_path + "/melanoma"
-
-    test_no_mel_path = test_path + "/no_melanoma"
-    test_mel_path = test_path + "/melanoma"
-
-
-    sets = ["Train", "Validation", "Test"]
-    for set in sets:
-        images = [file for file in listdir(path +"/"+set) if not "melanoma" in file]
-        csv_path = path + "/"+set +"_GT_result.csv"
-        for image in sorted(images):
-            image_id = splitext(image)[0]
-            res = get_result(image_id, csv_path)
-            if res == 0:
-                savepath = path + "/" + set + "/no_melanoma"
-            else:
-                savepath = path + "/" + set + "/melanoma"
-            os.makedirs(savepath, exist_ok=True)
-            image_path = path + "/" +set + "/" + image
-            img = Image.open(image_path)
-            img.save(savepath+ "/"+image)
+from data_process import get_result
+import sys
+sys.path.append('/home/userfs/m/mi714/Desktop/Keras-PRBX/networks')
+from unet_nn import unet
+from unet_res_se_nn import unet_res_se
+from focus import get_focusnetAlpha
+from resnet import get_res
 
 
 
 
 
-# path is the path with actual images
 def generate_masks(model, path, save_path):
     """Takes a model as input and predicts segmentation masks for each image.
 
@@ -123,25 +88,100 @@ def generate_dataset(pred_masks_path, images_path, save_path):
 
 
 
+def generate_targets(path, csv_path):
+        images = os.listdir(path)
+        images.sort()
+        labels = []
+
+        for image in images:
+                image_id = os.path.splitext(image)[0]
+                temp = get_result(image_id, csv_path)
+                labels.append(temp)
+        labels = np.array(labels)
+        labels = labels[:, np.newaxis]
+
+        y_array = to_categorical(labels, 2)
+        y_array = np.array(y_array)
+        return y_array 
+
+
+
 
 if __name__ == "__main__":
-    #unet = unet((256,256,1), batch_norm=False)
-    # unetresse = get_unet()
-    # focus = focusnet()
-    # model = get_focusnetAlpha()
+    ############## MODELS ##############
+    # SEGMENTATION
+    # U-Net
+    # model = unet(batch_norm=False)
+    # model.load_weights("/var/tmp/mi714/NEW/models/UNET/unet8/unet8_weights.h5")
+    # U-Net BatchNorm
+    # model = unet(batch_norm=True)
+    # model.load_weights("/var/tmp/mi714/NEW/models/UNET_BN/unet_bn3/unet_bn3_weights.h5")
+    # U-Net Res SE
+    # model = unet_res_se()
+    # model.load_weights("/var/tmp/mi714/NEW/models/UNET_RES_SE/unet_res_se3/unet_res_se3_weights.h5")
+    #Focusnet
+    model = get_focusnetAlpha()
+    model.load_weights("/var/tmp/mi714/NEW/models/FOCUS/focusnet5/focusnet5_weights.h5")
 
-    # #unet.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_nobn/unet_nobn1/unet_nobn_weights.h5")
-    # #unetbn.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_bn/unet_bn/unet_bn_weights.h5")
-    # #unetresse.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/unet_polished/unet_polished_weights.h5")
-    # #focus.load_weights("/var/tmp/mi714/aug17/models/NEW_mynpy3dimensions/focusnet99/focus_weights.h5")
-    # model.load_weights("/var/tmp/mi714/NEW/models/focusnet_dice/focusnet_dice_weights.h5")
-
-    # dataset_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Test_v2_Data"
-    # save_path = "/var/tmp/mi714/NEW/predictions/focusnet/test"
-    # generate_new(model, dataset_path, save_path)
+    # CLASSIFICATION
+    # ResNet OG
+    # model = get_res()
+    # model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_OG/resnet_og/resnet_weights.h5")
 
 
-    generate_dataset(pred_masks_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Part1_GroundTruth",
-                    images_path="D:/Users/imbrm/ISIC_2017_new/small/ISIC-2017_Training_Data",
-                    save_path="D:/Users/imbrm/ISIC_2017_new/small/delete")
 
+    ############## PREDICTED MASKS GENERATION ##############
+    # dataset_path = "/var/tmp/mi714/NEW/aug_dataset"
+
+    # save_path = "/var/tmp/mi714/NEW/predictions/unet_res_se"
+    # train_save = save_path + "/ISIC-2017_Training_Data"
+    # val_save = save_path + "/ISIC-2017_Validation_Data"
+    # test_save = save_path + "/ISIC-2017_Test_v2_Data"
+
+    # os.makedirs(train_save, exist_ok=True)
+    # os.makedirs(val_save, exist_ok=True)
+    # os.makedirs(test_save, exist_ok=True)
+    
+    # # Train set
+    # generate_masks(model,
+    #              dataset_path + "/ISIC-2017_Training_Data",
+    #              train_save)
+    
+    # Validation set
+    # generate_masks(model,
+    #              dataset_path + "/ISIC-2017_Validation_Data",
+    #              val_save)
+    
+    # Test set
+    # generate_masks(model,
+    #              dataset_path + "/ISIC-2017_Test_v2_Data",
+    #              test_save)
+    
+
+
+    ############# GENERATION OF NEW DATASETS (image * predicted masks) ##############
+    dataset_path = "/var/tmp/mi714/NEW/aug_dataset"
+    train_path = dataset_path + "/ISIC-2017_Training_Data"
+    val_path = dataset_path + "/ISIC-2017_Validation_Data"
+    test_path = dataset_path + "/ISIC-2017_Test_v2_Data"
+
+    pred_masks = "/var/tmp/mi714/NEW/predictions/unet_bn"       ######################### <== change model here
+    train_pred_masks = pred_masks + "/ISIC-2017_Training_Data"
+    val_pred_masks = pred_masks + "/ISIC-2017_Validation_Data"
+    test_pred_masks = pred_masks + "/ISIC-2017_Test_v2_Data"
+
+    save_path = "/var/tmp/mi714/NEW/cropped_datasets/unet_bn"   ######################### <== change model here
+    train_save = save_path + "/ISIC-2017_Training_Data"
+    val_save = save_path + "/ISIC-2017_Validation_Data"
+    test_save = save_path + "/ISIC-2017_Test_v2_Data"
+
+    os.makedirs(train_save, exist_ok=True)
+    os.makedirs(val_save, exist_ok=True)
+    os.makedirs(test_save, exist_ok=True)
+
+    # Train set
+    generate_dataset(train_pred_masks, train_path, train_save)
+    # Validation set
+    generate_dataset(val_pred_masks, val_path, val_save)
+    # Test set
+    generate_dataset(test_pred_masks, test_path, test_save)
