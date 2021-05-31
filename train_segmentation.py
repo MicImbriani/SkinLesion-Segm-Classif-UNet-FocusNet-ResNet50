@@ -10,9 +10,9 @@ from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from keras.metrics import MeanIoU
 
-from networks.unet_nn import unet
+# from networks.unet_nn import unet
 # from networks.unet_res_se_nn import unet_res_se
-# from networks.focus import get_focusnetAlpha
+from networks.focus import get_focusnetAlpha
 
 
 
@@ -35,18 +35,18 @@ valMask /= 255.
 
 model_name = "unet10"
 
-path = "/var/tmp/mi714/NEW/models/UNET/" + model_name
+path = "/var/tmp/mi714/NEW/models/UNET_BN/" + model_name
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
-model = unet(batch_norm=False)
+# model = unet(batch_norm=False)
 # model = unet(batch_norm=True)
 # model = unet_res_se()
-# model = get_focusnetAlpha()
+model = get_focusnetAlpha()
 
 # Optimizers
 my_adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
-my_sgd = SGD(lr=0.00001, momentum=0.9, decay=1e-6, nesterov=True)
+my_sgd = SGD(lr=0.0001, momentum=0.9, decay=1e-6, nesterov=True)
 
 # Compile model and print summary
 model.compile(optimizer=my_adam,
@@ -93,7 +93,6 @@ history = model.fit(trainData,
                     callbacks=callbacks
                     )
 
-model.save(path + "/" + model_name + "_model.h5")
 
 ########################################################################################################################################################################
 
@@ -132,4 +131,4 @@ plt.title('model true negative')
 plt.ylabel('negatives')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
-plt.savefig(path + '/neg.png')
+plt.savefig(path + '/neg.png')+

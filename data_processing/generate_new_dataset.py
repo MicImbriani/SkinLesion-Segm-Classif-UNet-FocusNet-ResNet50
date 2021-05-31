@@ -8,7 +8,7 @@ import numpy as np
 from keras.preprocessing.image import img_to_array
 from tensorflow.keras.utils import to_categorical
 
-from data_process import get_result
+from data_processing.data_process import get_result
 import sys
 sys.path.append('/home/userfs/m/mi714/Desktop/Keras-PRBX/networks')
 from unet_nn import unet
@@ -117,11 +117,11 @@ if __name__ == "__main__":
     # model = unet(batch_norm=True)
     # model.load_weights("/var/tmp/mi714/NEW/models/UNET_BN/unet_bn3/unet_bn3_weights.h5")
     # U-Net Res SE
-    # model = unet_res_se()
-    # model.load_weights("/var/tmp/mi714/NEW/models/UNET_RES_SE/unet_res_se3/unet_res_se3_weights.h5")
+    model = unet_res_se()
+    model.load_weights("/var/tmp/mi714/NEW/models/UNET_RES_SE/unet_res_se3/unet_res_se3_weights.h5")
     #Focusnet
-    model = get_focusnetAlpha()
-    model.load_weights("/var/tmp/mi714/NEW/models/FOCUS/focusnet5/focusnet5_weights.h5")
+    # model = get_focusnetAlpha()
+    # model.load_weights("/var/tmp/mi714/NEW/models/FOCUS/focusnet5/focusnet5_weights.h5")
 
     # CLASSIFICATION
     # ResNet OG
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     ############## PREDICTED MASKS GENERATION ##############
     # dataset_path = "/var/tmp/mi714/NEW/aug_dataset"
 
-    # save_path = "/var/tmp/mi714/NEW/predictions/unet_res_se"
+    # save_path = "/var/tmp/mi714/NEW/predictions/unet_bn"
     # train_save = save_path + "/ISIC-2017_Training_Data"
     # val_save = save_path + "/ISIC-2017_Validation_Data"
     # test_save = save_path + "/ISIC-2017_Test_v2_Data"
@@ -147,12 +147,12 @@ if __name__ == "__main__":
     #              dataset_path + "/ISIC-2017_Training_Data",
     #              train_save)
     
-    # Validation set
+    # # Validation set
     # generate_masks(model,
     #              dataset_path + "/ISIC-2017_Validation_Data",
     #              val_save)
     
-    # Test set
+    # # Test set
     # generate_masks(model,
     #              dataset_path + "/ISIC-2017_Test_v2_Data",
     #              test_save)
@@ -165,12 +165,12 @@ if __name__ == "__main__":
     val_path = dataset_path + "/ISIC-2017_Validation_Data"
     test_path = dataset_path + "/ISIC-2017_Test_v2_Data"
 
-    pred_masks = "/var/tmp/mi714/NEW/predictions/unet_bn"       ######################### <== change model here
+    pred_masks = "/var/tmp/mi714/NEW/predictions/unet_res_se"       ######################### <== change model here
     train_pred_masks = pred_masks + "/ISIC-2017_Training_Data"
     val_pred_masks = pred_masks + "/ISIC-2017_Validation_Data"
     test_pred_masks = pred_masks + "/ISIC-2017_Test_v2_Data"
 
-    save_path = "/var/tmp/mi714/NEW/cropped_datasets/unet_bn"   ######################### <== change model here
+    save_path = "/var/tmp/mi714/NEW/cropped_datasets/unet_res_se"   ######################### <== change model here
     train_save = save_path + "/ISIC-2017_Training_Data"
     val_save = save_path + "/ISIC-2017_Validation_Data"
     test_save = save_path + "/ISIC-2017_Test_v2_Data"

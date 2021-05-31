@@ -21,7 +21,7 @@ from data_processing.generate_new_dataset import generate_targets
 
 
 
-        
+
 # Generate target array for train set
 train_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Data"
 train_csv_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Part3_GroundTruth.csv"
@@ -34,14 +34,15 @@ val_csv_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Validation_Part3_Ground
 y_val = generate_targets(val_path, val_csv_path)
 print(y_val.shape)
 
-# Load train data and "convert" to RGB by expanding the channel dimension
-x_train = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
+# Load train and validation data and "convert" to RGB by expanding the channel dimension
+# "npy_dataset" folder for baseline ResNet trained on augmented dataset
+# "npy_dataset_cropped/MODEL" for all other ResNets trained on the cropped datasets 
+x_train = np.load('/var/tmp/mi714/NEW/npy_dataset_cropped/focusnet/data.npy')
 x_train = np.concatenate((x_train,)*3, axis=-1)
 x_train = preprocess_input(x_train)
 print(x_train.shape)
 
-# Load validation data and "convert" to RGB by expanding the channel dimension
-x_val = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
+x_val = np.load('/var/tmp/mi714/NEW/npy_dataset_cropped/focusnet/dataval.npy')
 x_val = np.concatenate((x_val,)*3, axis=-1)
 x_val = preprocess_input(x_val)
 print(x_val.shape)
@@ -53,10 +54,10 @@ x_val /= 255
 
 
 
+# for i in range (4,11):
+model_name = "resnet_focusnet8"
 
-model_name = "resnet_og10"
-
-path = "/var/tmp/mi714/NEW/models/RESNETS/RESNET_OG/" + model_name
+path = "/var/tmp/mi714/NEW/models/RESNETS/RESNET_FOCUSNET/" + model_name
 os.makedirs(path, exist_ok=True)
 
 model = get_res()
@@ -67,47 +68,47 @@ my_adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 
 # Compile model and print summary
 rocauc = AUC(num_thresholds=200,
-            curve="ROC",
-            summation_method="interpolation",
-            name=None,
-            dtype=None,
-            thresholds=None,
-            multi_label=False,
-            label_weights=None,
-            )
+        curve="ROC",
+        summation_method="interpolation",
+        name=None,
+        dtype=None,
+        thresholds=None,
+        multi_label=False,
+        label_weights=None,
+        )
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=my_adam,
-              metrics=[sensitivity,
-                       specificity,
-                       rocauc,
-                       'acc'
-                       ])
+        optimizer=my_adam,
+        metrics=[sensitivity,
+                specificity,
+                rocauc,
+                'acc'
+                ])
 
 model.summary()
 
 checkpoint = ModelCheckpoint(path + "/" + model_name + "_weights.h5", 
-                             monitor='val_auc',
-                             verbose=1,
-                             save_best_only=True,
-                             save_weights_only=True,
-                             mode='max'
-                             )
+                        monitor='val_auc',
+                        verbose=1,
+                        save_best_only=True,
+                        save_weights_only=True,
+                        mode='max'
+                        )
 early_stopping = EarlyStopping(patience=10,
-                               monitor='val_auc',
-                               mode='max',
-                               verbose=1,
-                               min_delta=0.01
-                               )
+                        monitor='val_auc',
+                        mode='max',
+                        verbose=1,
+                        min_delta=0.01
+                        )
 reduce_lr = ReduceLROnPlateau(monitor='val_auc',
-                              mode='max',
-                              min_delta=0.01,
-                              cooldown=0,
-                              min_lr=0.5e-7,
-                              factor=0.5,
-                              patience=5,
-                              verbose=1
-                              )
+                        mode='max',
+                        min_delta=0.01,
+                        cooldown=0,
+                        min_lr=0.5e-7,
+                        factor=0.5,
+                        patience=5,
+                        verbose=1
+                        )
 
 # Train the model
 history = model.fit(x_train,
@@ -123,7 +124,8 @@ history = model.fit(x_train,
                         ],
                 )
 
-model.save(path + "/" + model_name + "_model.h5")
+
+########################################################################################################################################################################
 
 
 

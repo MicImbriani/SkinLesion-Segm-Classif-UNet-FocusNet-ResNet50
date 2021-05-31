@@ -81,3 +81,30 @@ def turn_npy(path, save_path):
     np.save(save_path + '/dataMaskval.npy', val_y)
     np.save(save_path + '/datatest.npy', test_X)
     np.save(save_path + '/dataMasktest.npy', test_y)
+
+
+
+def turn_npy_nomasks(path, save_path):
+    """Takes root path containing splits of dataset, 
+    converts to numpy and saves in .npy format.
+
+    Args:
+        path (string): Path to dataset.
+        save_path (string): Path to destination folder to save .npy files.
+    """    
+    images_folder_path = path + "/ISIC-2017_Training_Data"
+    val_imgs_folder_path = path + "/ISIC-2017_Validation_Data"
+    test_imgs_folder_path = path + "/ISIC-2017_Test_v2_Data"
+
+    train_X = turn_npy_imgs(images_folder_path)
+    val_X = turn_npy_imgs(val_imgs_folder_path)
+    test_X = turn_npy_imgs(test_imgs_folder_path)
+
+    np.save(save_path + '/data.npy',train_X)
+    np.save(save_path + '/dataval.npy', val_X)
+    np.save(save_path + '/datatest.npy', test_X)
+
+turn_npy_nomasks("/var/tmp/mi714/NEW/cropped_datasets/unet", "/var/tmp/mi714/NEW/npy_dataset_cropped/unet")
+turn_npy_nomasks("/var/tmp/mi714/NEW/cropped_datasets/unet_bn", "/var/tmp/mi714/NEW/npy_dataset_cropped/unet_bn")
+turn_npy_nomasks("/var/tmp/mi714/NEW/cropped_datasets/unet_res_se", "/var/tmp/mi714/NEW/npy_dataset_cropped/unet_res_se")
+turn_npy_nomasks("/var/tmp/mi714/NEW/cropped_datasets/focusnet", "/var/tmp/mi714/NEW/npy_dataset_cropped/focusnet")

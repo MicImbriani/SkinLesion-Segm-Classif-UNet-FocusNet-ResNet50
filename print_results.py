@@ -31,15 +31,16 @@ model.load_weights("/var/tmp/mi714/NEW/models/UNET/unet10/unet10_weights.h5")
 ########### CLASSIFICATION ###########
 # model = get_res()
 # Original
-# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_OG/resnet_og/resnet_weights.h5")
+# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_OG/resnet_og10/resnet_og10_weights.h5")
 # U-Net
-# model.load_weights()
+# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_UNET_BN/resnet_unet10/resnet_unet10_weights.h5")
 # U-Net BatchNorm
-# model.load_weights()
+# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_UNET_BN/resnet_unet_bn10/resnet_unet_bn10_weights.h5")
 # Res SE U-Net
-# model.load_weights()
+# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_UNET_RES_SE/resnet_unet_res_se10/resnet_unet_res_se10_weights.h5")
 # FocusNet
-# model.load_weights()
+# model.load_weights("/var/tmp/mi714/NEW/models/RESNETS/RESNET_FOCUSNET/resnet_focusnet7/resnet_focusnet7_weights.h5")
+
 
 
 
