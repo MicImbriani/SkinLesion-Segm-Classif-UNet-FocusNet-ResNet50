@@ -3,12 +3,19 @@ from os.path import splitext
 from os import listdir
 import csv
 
-from data_processing.data_process import del_superpixels, convert_format, grey_resize
-from data_processing.augmentation import augment_dataset
 from data_processing.to_npy import turn_npy
+from data_processing.augmentation import augment_dataset
+from data_processing.data_process import del_superpixels, convert_format, grey_resize
+
 
 
 def generate_dataset(path, n_jobs):
+    """Generate augmented dataset.
+
+    Args:
+        path (string): Path to original ISIC dataset.
+        n_jobs (int): Number of jobs to use for parallelisation.
+    """    
     # Generate the Train paths.
     images_folder_path = path + "/ISIC-2017_Training_Data"
     masks_folder_path = path + "/ISIC-2017_Training_Part1_GroundTruth"

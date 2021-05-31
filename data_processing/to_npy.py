@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import splitext
-from PIL import Image
 
+from PIL import Image
 import cv2
 import numpy as np
 

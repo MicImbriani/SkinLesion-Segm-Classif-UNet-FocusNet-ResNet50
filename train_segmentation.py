@@ -32,7 +32,7 @@ valMask /= 255.
 
 
 
-
+# Prepare model 
 model_name = "unet10"
 
 path = "/var/tmp/mi714/NEW/models/UNET_BN/" + model_name
@@ -96,7 +96,7 @@ history = model.fit(trainData,
 
 ########################################################################################################################################################################
 
-
+# GRAPHS
 # summarize history for loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
