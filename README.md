@@ -11,5 +11,3 @@ Data augmentation using the Albumentation library has been applied to the datase
 Here are some examples of augmentation performed:<br>
 
 ![Augmentation Example](/images/augm_example.png)
-Format: ![Augmentation Example](https://postimg.cc/Z0Z035Ln)
-
