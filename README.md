@@ -12,14 +12,13 @@ These new datasets are used to train 4 different versions of ResNet50 from Keras
 An example pipeline of what one of the end-to-end networks would look like is shown in the image below:
 <br>
 ![Cropping Example](/images/pipeline.png)
-
-<br><br>
-Performing Student's T-Test on the classification AUC ROC results show that a positive correlation exists between the application of increasingly more advanced segmentation architectures and the classification performance.
+<br>
+Performing Student's T-Test on the classification AUC ROC results (which are stored in the "results.xlsx" file) show that a positive correlation exists between the application of increasingly more advanced segmentation architectures and the classification performance.
 <br><br><br><br>
 Dataset can be downloaded directly from ISIC 2020 challenge's website.
 <br>
 https://challenge.isic-archive.com/data
-<br><br><br><br>
+<br><br>
 Data augmentation using the Albumentation library has been applied to the dataset.
 <br>
 Here are some examples of augmentation performed:<br>
