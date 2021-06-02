@@ -1,11 +1,25 @@
 # SkinLesion-Segm-Classif-UNet-FocusNet-ResNet50
 
-The aim of this project would be to extract segmentations, landmarks, and contours from real-life pictures of lesions in order to detect and classify, using advanced algorithms, the stages of the development of skin cancer. The level of accessibility of the results would then be within the scope of the average users: people with no prior medicine/dermatology knowledge will be able to intuitively understand the results; thus, ensuring that the appropriate action (e.g. book appointment with specialist) will be taken if required. To execute this project, I will employ advanced ML techniques: I will create a Convolutional Neural Network (CNN) based on a U-Net architecture. Furthermore, I will explore the different variants of the U-Net architecture currently existing. I will start my work by investigating and assessing the appropriateness of the vanilla U-Net variant, and will then proceed to compare this with different architectures, eventually culminating with a comparison of the various architectures, training regimes and loss functions for the tasks. The ultimate aim is that the architecture, loss functions and training regimes that are most successful on the benchmarks should inform possible improvements in each of these and thereby extent the state-of-the-art in this area.
+In this project, the vanilla U-Net, U-Net with Batch Norm, a variation of U-Net using Residual blocks and Squeeze-and-excitation blocks, and the novel FocusNet developed at the University of York will be used for analysing the influence of image segmentation as a pre-processing step for skin lesion classification.
+<br>
+<br>
+After having trained the four models on an augmented version of the ISIC 2017 dataset, they are used to generated prediction mask on the train, validation and test split. These predictions are then used to crop the initial images, effectively generating 4 new datasets. A visual representation of the process is shown below:
+<br>
+![Cropping Example](/images/cropping_example.png)
+<br><br>
+These new datasets are used to train 4 different versions of ResNet50 from Keras Application. By performing quantitative tests on the results, it is possible to discuss whether the employment of image segmentation has a positive, negative, or no effect at all on the classification of skin lesions.
+<br> 
+An example pipeline of what one of the end-to-end networks would look like is shown in the image below:
+<br>
+![Cropping Example](/images/pipeline.png)
 
+<br><br>
+Performing Student's T-Test on the classification AUC ROC results show that a positive correlation exists between the application of increasingly more advanced segmentation architectures and the classification performance.
+<br><br><br><br>
 Dataset can be downloaded directly from ISIC 2020 challenge's website.
-
+<br>
 https://challenge.isic-archive.com/data
-
+<br><br><br><br>
 Data augmentation using the Albumentation library has been applied to the dataset.
 <br>
 Here are some examples of augmentation performed:<br>
