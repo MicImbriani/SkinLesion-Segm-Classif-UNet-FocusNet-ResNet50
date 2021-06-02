@@ -17,11 +17,11 @@ from networks.focus import get_focusnetAlpha
 
 
 # Load train and validation data and masks
-trainData = np.load('/var/tmp/mi714/NEW/npy_dataset/data.npy')
-trainMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMask.npy')
+trainData = np.load('./data/npy_formats/augmented_ISIC_dataset/data.npy')
+trainMask = np.load('./data/npy_formats/augmented_ISIC_dataset/dataMask.npy')
 
-valData = np.load('/var/tmp/mi714/NEW/npy_dataset/dataval.npy')
-valMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMaskval.npy')
+valData = np.load('./data/npy_formats/augmented_ISIC_dataset/dataval.npy')
+valMask = np.load('./data/npy_formats/augmented_ISIC_dataset/dataMaskval.npy')
 
 # Rescale masks in range [0,1]
 trainMask = trainMask.astype('float32')
@@ -32,10 +32,10 @@ valMask /= 255.
 
 
 
-
+# Prepare model 
 model_name = "unet10"
 
-path = "/var/tmp/mi714/NEW/models/UNET_BN/" + model_name
+path = "./models/UNET_BN/" + model_name
 os.makedirs(path, exist_ok=True)
 
 # Selection of which model to train
@@ -96,7 +96,7 @@ history = model.fit(trainData,
 
 ########################################################################################################################################################################
 
-
+# GRAPHS
 # summarize history for loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])

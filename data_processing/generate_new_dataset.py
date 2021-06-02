@@ -37,16 +37,18 @@ def generate_masks(model, path, save_path):
     testData = np.load('/var/tmp/mi714/NEW/npy_dataset/datatest.npy')
     testMask = np.load('/var/tmp/mi714/NEW/npy_dataset/dataMasktest.npy')
 
-    #p = focus.predict(trainData)
     images = [file for file in listdir(path)]
-    #files = os.listdir(path)
     for image in images:
+        # Get image
         img_id = splitext(image)[0]
         x = Image.open(path + "/" + image).convert('L')
         x = np.asarray(x, dtype=np.float32)
+        # Add channel axis and batch axis
         x = x[np.newaxis,...]   
         x = x[...,np.newaxis]
         x = np.asarray(x)
+        # Make the prediction and treshold it at 0.5 so that pixels predicted as
+        # 1 will be shown as white while the rest is all black. Then saves.
         img = model.predict(x)
         img = img[0,:,:,:]
         _, img = cv2.threshold(img, 0.5, 255, cv2.THRESH_BINARY)
@@ -89,6 +91,15 @@ def generate_dataset(pred_masks_path, images_path, save_path):
 
 
 def generate_targets(path, csv_path):
+    """Generate target labels for training classification models.
+
+    Args:
+        path (string): Path to images to be made the label for.
+        csv_path (string): Path to folder containing .csv file with diagnosis results.
+
+    Returns:
+        y_array (numpy array): Numpy array containing the target labels.
+    """    
         images = os.listdir(path)
         images.sort()
         labels = []

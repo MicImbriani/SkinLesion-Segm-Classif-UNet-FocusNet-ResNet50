@@ -1,4 +1,6 @@
 import os 
+#os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -23,7 +25,7 @@ from data_processing.generate_new_dataset import generate_targets
 
 
 # Generate target array for train set
-train_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Data"
+train_path = "./data/npy_formats/augmented_ISIC_dataset/ISIC-2017_Training_Data"
 train_csv_path = "/var/tmp/mi714/NEW/aug_dataset/ISIC-2017_Training_Part3_GroundTruth.csv"
 y_train = generate_targets(train_path, train_csv_path)
 print(y_train.shape)

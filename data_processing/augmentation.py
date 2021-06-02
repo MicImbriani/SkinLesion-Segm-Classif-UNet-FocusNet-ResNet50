@@ -2,16 +2,16 @@ import os
 from os.path import splitext
 from os import listdir
 import random
-import cv2
 import csv
 
+import cv2
+from PIL import Image, ImageFile
+import albumentations as A
 import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
-from PIL import Image, ImageFile
 from joblib import Parallel, delayed
-import albumentations as A
 
 from data_processing.data_process import grey_resize, get_result
 
@@ -23,7 +23,7 @@ ImageFile.LOAD_TRUCATED_IMAGES = True
 
 
 def augment_operations(image_id, image_folder_path, mask_folder_path, train_val, x):
-    """Performs augmentation operations on the inputted image.
+    """Perform augmentation operations on the inputted image.
     Seed is used for for applying the same augmentation to the image and its mask.
 
     Args:
@@ -31,6 +31,7 @@ def augment_operations(image_id, image_folder_path, mask_folder_path, train_val,
         image_folder_path (string): Path of folder in which the augmented img will be saved.
         mask_folder_path (string): Path of folder in which the augmented mask will be saved.
         train_val (string): Specifies whether it's "Train" or "Validation".
+        x (string): The suffix to be added to images IDs for augmentated images.
 
     Returns:
         new_img (Image): New augmented PIL image.
@@ -102,15 +103,9 @@ def augment_operations(image_id, image_folder_path, mask_folder_path, train_val,
 
 
 def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, train_val):
-    """Executes augmentation on a single image. Due to imbalanced dataset,
-    it will perform more augmentation on melanoma images.
-    If mole is not melanoma, perform 1 augmentation with probability=0.5.
+    """Executes augmentation on a single image and mask, saves them, and turn image to greyscale. 
     If mole is melanoma, perform 4 augmentation with probability=1.
     It performs the same transformation on the image and its relative mask.
-    I chose a simple random number generator over PyTorch's RandomApply because
-    this way an image that is not ment to be augmented will not be processed at all:
-    when using RandomApply, the image will still be saved as ___x1 despite having
-    recieved no augmentation i.e. being identical to the original picture.
 
     Args:
         image_id (string): ID of the image to be augmented.
@@ -119,6 +114,7 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
         csv_file_path (string): Path leading to the .csv file with ground truth.
         train_val (string): Specifies whether it's "Train" or "Validation".
     """
+    # If the image is from Validation set, always perform aumgmentation 
     if train_val == "Validation":
         img_1, img_1_mask = augment_operations(image_id, images_folder_path, masks_folder_path, train_val, "")
 
@@ -129,7 +125,8 @@ def augment_img(image_id, images_folder_path, masks_folder_path, csv_file_path, 
         grey_resize(image_id, images_folder_path, masks_folder_path)
         
         return
-        
+    
+    # If image is from train set perform 4 sugmentations only if it's melanoma.
     else:
         melanoma = int(get_result(image_id, csv_file_path))
 

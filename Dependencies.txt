@@ -1,0 +1,17 @@
+Package                 Version
+----------------------- ---------
+albumentation		0.5.2
+joblib			1.0.1
+Keras 			2.4.3
+Keras-Preprocessing	1.1.2
+matplotlib		3.3.4
+numpy                   1.19.5
+opencv-python 		4.5.1.48
+pandas                  1.1.5
+Pillow                  8.2.0
+python			3.6
+scikit-image		0.17.2
+scikit-learn		0.24.1
+scipy			1.5.4
+tensorflow		2.4.1
+tqdm			4.60.0
