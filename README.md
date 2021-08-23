@@ -30,16 +30,23 @@ This is then fed into a respective pre-trained classification network: each segm
 <br><br>
 To test whether using segmented images for training a classification network yields better results than simply using the original images with simple augmentation transformations, all the results produced by the different ResNets are then evaluated against the “baseline” instance of ResNet trained on the original, non-cropped, augmented images i.e. the same images used for training the segmentation networks.
 <br>
-
 <br>
-Performing Student's T-Test on the classification AUC ROC results (which are stored in the "results.xlsx" file) show that a positive correlation exists between the application of increasingly more advanced segmentation architectures and the classification performance.
-<br><br><br><br>
-Dataset can be downloaded directly from ISIC 2020 challenge's website.
-<br>
-https://challenge.isic-archive.com/data
+<h2>RESULTS</h2>
+A statistical hypothesis test is used to evaluate the probability of observing a pair of data samples under the assumption that they were drawn from the same distribution (null hypothesis). If rejected, it means that the difference between the two data samples is statistically significant enough to indicate that the difference in results implies a difference in models’ abilities rather than statistical chance. <br>
+The results obtained from the multiple training iterations of each model were used as samples for performing the statistical tests.
+<br>Furthermore, a Shapiro-Wilk test is used to test for normality.
+<br>Visual analysis is also performed using Box-&-Whiskers Plots and QQ-plots.
 <br><br>
-Data augmentation using the Albumentation library has been applied to the dataset.
+An upper, one-tailed test was used over the two-tailed: this is because the objective of this project is to prove the presence of a positive correlation between the use of segmentation as a pre-processing step for skin lesion classification. As such, not only are we interested in verifying that segmentation does affect the classification (two-tailed test), but also that it improves it (upper one-tailed test). Using the Student’s t-tables [91], the critical value for 18 degrees of freedom for an upper one-tailed test and p=0.05 is 1.734. If the t-value is greater than the critical value, then we reject the null hypothesis i.e. there is strong evidence for results not being due to statistical chance. <br>
+Performing the test between the results obtained from the baseline ResNet and the other ResNets one at a time returns the respective t-values, which are shown in the table below:
 <br>
-Here are some examples of augmentation performed:<br>
+![Student T-test](/images/studenttest.png)
 
-![Augmentation Example](/images/augm_example.png)
+<br><br>
+Except for the traditional U-Net, which was not able to learn the segmentation task (producing instead all white or all black images) the null hypothesis is rejected for all the models. 
+<br><br>
+These results prove that, in the context of skin lesion imaging, the use of image segmentation as a pre-processing step has a positive effect on the classification performance which is variable in effect based on the segmentation neural network architecture used. <br>
+As such the self-defined goals have been achieved and all the goals for the projects have been met. Furthermore, the results highlight another interesting element: some segmentation architectures might be unable to learn any function at all, in which case the classification performance is obviously affected as a consequence. 
+
+
+
