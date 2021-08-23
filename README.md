@@ -20,13 +20,13 @@ The use of the ISIC datasets is permitted under the CC-0 license, which effectiv
 <h2>THE IMPORTANT PART: SEGMENTATION-TO-CLASSIFICATION PIPELINE</h2>
 On a high-level, the approach taken for achieving these self-defined goals consists of the manual implementation of four artificial neural network architectures for the segmentation task, which produce new sets of predicted segmentation masks each. These masks are used to crop the original dataset, hence producing, for each segmentation model, a new cropped dataset. 
 <br> An example of cropping lesion images using the predicted segmentation masks is shown below:
-<br>![image](https://user-images.githubusercontent.com/67190150/130466724-d487bdc2-c50b-45ca-8b59-8dca7cf7b2a6.png)
+<br>
+![Cropping](/images/cropping_example.png)
 
 <br><br>
 This is then fed into a respective pre-trained classification network: each segmentation model will have its own classification model trained on the generated dataset. The version of the classification model trained on the original dataset is used as baseline for the evaluation. An example pipeline using U-Net architecture is shown below:
 <br>
-![image](https://user-images.githubusercontent.com/67190150/130466379-ddb0e55f-4279-430f-8030-8ebe441314d0.png)
-![Cropping Example](/images/pipeline.png)
+![Pipeline](/images/pipeline.png)
 <br><br>
 To test whether using segmented images for training a classification network yields better results than simply using the original images with simple augmentation transformations, all the results produced by the different ResNets are then evaluated against the “baseline” instance of ResNet trained on the original, non-cropped, augmented images i.e. the same images used for training the segmentation networks.
 <br>
